@@ -45,7 +45,7 @@ export default async (req, res) => {
     if (process.env.TWILIO_SERVICE_SID) {
       await client.messaging.v1.services(process.env.TWILIO_SERVICE_SID)
         .update({
-          inboundRequestUrl: 'https://whatsapp-ai-bot-1ox3-git-main-kunal-kansras-projects.vercel.app/api/handle-message',
+          inboundRequestUrl: 'https://whatsapp-ai-bot-1ox3.vercel.app/api/handle-message',
         });
     } else {
       console.warn("TWILIO_SERVICE_SID not set — skipping webhook update.");
