@@ -6,17 +6,11 @@ const saveToDatabase = async (id, data) => {
 };
 
 export default async (req, res) => {
-  // CORS headers
+  // CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-  // Handle preflight request
   if (req.method === 'OPTIONS') {
-    return res.status(200).end();
+    return res.status(204).end();
   }
-
-  console.log("Request received:", req.method, req.body);
 
   try {
     if (req.method !== 'POST') {
@@ -24,40 +18,43 @@ export default async (req, res) => {
     }
 
     const { businessInfo, qaPairs } = req.body;
-
     if (!businessInfo?.whatsappNumber || !qaPairs) {
-      return res.status(400).json({
-        error: 'Missing businessInfo.whatsappNumber or qaPairs'
+      return res.status(400).json({ 
+        error: 'Missing businessInfo.whatsappNumber or qaPairs' 
       });
     }
 
     await saveToDatabase(businessInfo.whatsappNumber, { businessInfo, qaPairs });
 
+    // Fallback to sandbox if no Twilio credentials
     if (!process.env.TWILIO_SID || !process.env.TWILIO_AUTH_TOKEN) {
-      throw new Error('Twilio credentials missing');
+      return res.json({
+        success: true,
+        whatsappNumber: '+14155238886',
+        isSandbox: true,
+        warning: "Twilio credentials missing — using sandbox"
+      });
     }
 
-    const client = twilio(
-      process.env.TWILIO_SID,
-      process.env.TWILIO_AUTH_TOKEN
-    );
+    const client = twilio(process.env.TWILIO_SID, process.env.TWILIO_AUTH_TOKEN);
+    const webhookUrl = process.env.BASE_URL 
+      ? `${process.env.BASE_URL}/api/handle-message`
+      : 'https://whatsapp-ai-bot-1ox3.vercel.app/api/handle-message';
 
     if (process.env.TWILIO_SERVICE_SID) {
       await client.messaging.v1.services(process.env.TWILIO_SERVICE_SID)
-        .update({
-          inboundRequestUrl: 'https://whatsapp-ai-bot-1ox3.vercel.app/api/handle-message',
-        });
-    } else {
-      console.warn("TWILIO_SERVICE_SID not set — skipping webhook update.");
+        .update({ inboundRequestUrl: webhookUrl });
+      console.log("Twilio webhook configured:", webhookUrl);
     }
 
     res.json({
       success: true,
-      whatsappNumber: process.env.TWILIO_PHONE_NUMBER || businessInfo.whatsappNumber
+      whatsappNumber: process.env.TWILIO_PHONE_NUMBER || '+14155238886',
+      isSandbox: !process.env.TWILIO_PHONE_NUMBER
     });
 
   } catch (error) {
-    console.error("CRASH:", error);
+    console.error("Deployment failed:", error);
     res.status(500).json({
       error: error.message || 'Internal server error',
       stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
