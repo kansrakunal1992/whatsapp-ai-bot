@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deploy Your Bot | AI WhatsApp Automation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f8f9fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            width: 100%;
+        }
+        
+        .deploy-card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 40px;
+            text-align: center;
+        }
+        
+        h1 {
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
+        
+        p {
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        
+        .status-container {
+            margin: 30px 0;
+            padding: 20px;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+        }
+        
+        .status-icon {
+            font-size: 50px;
+            margin-bottom: 20px;
+        }
+        
+        .status-message {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .status-details {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .whatsapp-number {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #4CAF50;
+            margin: 20px 0;
+        }
+        
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        
+        .primary-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .primary-btn:hover {
+            background-color: #45a049;
+        }
+        
+        .secondary-btn {
+            background-color: #2c3e50;
+            color: white;
+        }
+        
+        .secondary-btn:hover {
+            background-color: #1a252f;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .test-instructions {
+            background-color: #e8f5e9;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        
+        .test-instructions h3 {
+            color: #4CAF50;
+            margin-bottom: 10px;
+        }
+        
+        .test-instructions ol {
+            padding-left: 20px;
+        }
+        
+        .test-instructions li {
+            margin-bottom: 8px;
+        }
+        
+        @media (max-width: 600px) {
+            .deploy-card {
+                padding: 20px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="deploy-card">
+            <h1>Deploy Your WhatsApp Bot</h1>
+            <p>Your AI-powered WhatsApp chatbot is ready to go live! Click the button below to complete the setup.</p>
+            
+            <div class="status-container" id="statusContainer">
+                <div class="status-icon">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="status-message">Ready to Deploy</div>
+                <div class="status-details">Your bot is configured and waiting to be activated</div>
+            </div>
+            
+            <button class="btn primary-btn" id="setupBtn">
+                <i class="fas fa-rocket"></i> Deploy My Bot
+            </button>
+            
+            <div class="test-instructions" id="testInstructions" style="display: none;">
+                <h3>How to Test Your Bot</h3>
+                <ol>
+                    <li>Open WhatsApp on your phone</li>
+                    <li>Send "join your-code" to <span id="sandboxNumber">+14155238886</span></li>
+                    <li>Wait for confirmation message</li>
+                    <li>Start chatting with your test bot</li>
+                </ol>
+                <p><strong>Note:</strong> You can send up to 30 test messages during the trial period.</p>
+            </div>
+            
+            <div id="successContainer" style="display: none;">
+                <div class="whatsapp-number" id="whatsappNumberDisplay"></div>
+                <p>Your WhatsApp bot is now active! Use the number above to test it.</p>
+                
+                <div class="action-buttons">
+                    <a href="#" class="btn primary-btn" id="whatsappBtn">
+                        <i class="fab fa-whatsapp"></i> Open WhatsApp
+                    </a>
+                    <a href="LandingPage.html" class="btn secondary-btn">
+                        <i class="fas fa-home"></i> Return Home
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const setupBtn = document.getElementById('setupBtn');
+        const statusContainer = document.getElementById('statusContainer');
+        const statusIcon = statusContainer.querySelector('.status-icon');
+        const statusMessage = statusContainer.querySelector('.status-message');
+        const statusDetails = statusContainer.querySelector('.status-details');
+        const testInstructions = document.getElementById('testInstructions');
+        const successContainer = document.getElementById('successContainer');
+        const whatsappNumberDisplay = document.getElementById('whatsappNumberDisplay');
+        const whatsappBtn = document.getElementById('whatsappBtn');
+        
+        // Backend URL - Use your actual Vercel deployment URL
+        const BACKEND_URL = 'https://whatsapp-ai-bot-1ox3.vercel.app';
+        
+        // Load business info
+        async function getBusinessInfo() {
+            try {
+                const businessInfo = JSON.parse(localStorage.getItem('businessInfo'));
+                if (!businessInfo) {
+                    throw new Error('Business information not found');
+                }
+                return businessInfo;
+            } catch (error) {
+                console.error('Error loading business info:', error);
+                throw error;
+            }
+        }
+        
+        // Load QA pairs from Neon DB with fallback
+        async function loadQA() {
+            try {
+                const businessInfo = JSON.parse(localStorage.getItem('businessInfo'));
+                if (!businessInfo?.whatsappNumber) return {};
+                
+                const response = await fetch(`${BACKEND_URL}/api/get-qa?whatsappNumber=${encodeURIComponent(businessInfo.whatsappNumber)}`);
+                if (!response.ok) throw new Error('Failed to load Q&A');
+                return await response.json();
+            } catch (error) {
+                console.error('Error loading QA:', error);
+                return JSON.parse(localStorage.getItem('customizedQA') || {});
+            }
+        }
+        
+        // Deploy the bot
+        async function deployBot() {
+            try {
+                // Show loading state
+                setupBtn.disabled = true;
+                setupBtn.innerHTML = '<span class="spinner"></span> Configuring...';
+                
+                // Update status
+                statusIcon.innerHTML = '<i class="fas fa-cog fa-spin"></i>';
+                statusMessage.textContent = 'Deploying Your Bot';
+                statusDetails.textContent = 'Setting up WhatsApp integration and AI responses';
+                
+                // Get required data
+                const businessInfo = await getBusinessInfo();
+                const qaPairs = await loadQA();
+                
+                // Call deployment API
+                const response = await fetch(`${BACKEND_URL}/api/deploy-bot`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        businessInfo,
+                        qaPairs
+                    })
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                
+                // Show success
+                statusIcon.innerHTML = '<i class="fas fa-check-circle"></i>';
+                statusMessage.textContent = 'Deployment Successful!';
+                statusDetails.textContent = 'Your WhatsApp bot is now active';
+                
+                // Show WhatsApp number and test instructions
+                whatsappNumberDisplay.textContent = result.whatsappNumber || '+14155238886';
+                
+                // Set up WhatsApp button
+                whatsappBtn.href = `https://wa.me/${result.whatsappNumber.replace('+', '') || '14155238886'}?text=join%20your-code`;
+                
+                // Hide setup button, show success UI
+                setupBtn.style.display = 'none';
+                testInstructions.style.display = 'block';
+                successContainer.style.display = 'block';
+                
+            } catch (error) {
+                console.error('Deployment failed:', error);
+                
+                // Show error state
+                statusIcon.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
+                statusMessage.textContent = 'Deployment Failed';
+                statusDetails.textContent = error.message || 'An unknown error occurred';
+                
+                // Reset button
+                setupBtn.disabled = false;
+                setupBtn.innerHTML = '<i class="fas fa-rocket"></i> Retry Deployment';
+                
+                // Show error details in console
+                console.error('Full error:', error);
+            }
+        }
+        
+        // Event listeners
+        setupBtn.addEventListener('click', deployBot);
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check if we have required data
+            try {
+                const businessInfo = JSON.parse(localStorage.getItem('businessInfo'));
+                if (!businessInfo) {
+                    window.location.href = 'business-info.html';
+                }
+            } catch (e) {
+                window.location.href = 'business-info.html';
+            }
+        });
+    </script>
+</body>
+</html>
