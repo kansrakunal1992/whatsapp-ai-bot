@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot Preview | AI WhatsApp Automation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f8f9fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            display: flex;
+            gap: 30px;
+        }
+        
+        .left-panel {
+            width: 300px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 20px;
+            transition: all 0.3s ease;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .left-panel.collapsed {
+            width: 50px;
+            padding: 20px 10px;
+        }
+        
+        .left-panel.collapsed .panel-content {
+            display: none;
+        }
+        
+        .toggle-panel {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            margin-bottom: 15px;
+        }
+        
+        .panel-content h3 {
+            color: #4CAF50;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+        
+        .qa-list {
+            list-style: none;
+        }
+        
+        .qa-item {
+            padding: 10px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .qa-item:hover {
+            background: #e8f5e9;
+        }
+        
+        .qa-item .question {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .qa-item .answer {
+            font-size: 0.9rem;
+            color: #666;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .preview-section {
+            flex: 1;
+            max-width: 800px;
+        }
+        
+        h1 {
+            color: #4CAF50;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        p.subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .nav-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #2c3e50;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        
+        .nav-btn:hover {
+            background-color: #1a252f;
+        }
+        
+        .phone {
+            width: 320px;
+            height: 580px;
+            margin: 0 auto 30px;
+            background: #111;
+            border-radius: 40px;
+            padding: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            position: relative;
+        }
+        
+        .screen {
+            background-color: #e5ddd5;
+            height: 100%;
+            border-radius: 25px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        
+        .chat-header {
+            background: #4CAF50;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-weight: bold;
+            position: relative;
+        }
+        
+        .back-btn {
+            position: absolute;
+            left: 15px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+        
+        .chat-container {
+            flex: 1;
+            padding: 10px;
+            overflow-y: auto;
+            background-color: #e5ddd5;
+            background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4AkEEjIZW3Xp7QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRelJTVBkLmUHAAAAJUlEQVQ4y2NgGAWjYBSMglEwCkbBKBgIAAD//w8AHhQFBVHvX3kAAAAASUVORK5CYII=');
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .message {
+            max-width: 70%;
+            padding: 8px 12px;
+            margin: 5px;
+            border-radius: 7.5px;
+            position: relative;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .customer {
+            background: white;
+            align-self: flex-start;
+            border-top-left-radius: 0;
+        }
+        
+        .bot {
+            background: #dcf8c6;
+            align-self: flex-end;
+            border-top-right-radius: 0;
+        }
+        
+        .time {
+            font-size: 0.7rem;
+            color: #666;
+            text-align: right;
+            margin-top: 3px;
+        }
+        
+        .input-area {
+            display: flex;
+            padding: 10px;
+            background: #f0f0f0;
+            border-top: 1px solid #ddd;
+        }
+        
+        .message-input {
+            flex: 1;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 20px;
+            outline: none;
+        }
+        
+        .send-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            margin-left: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .deploy-btn, .customize-btn {
+            display: inline-block;
+            padding: 12px 24px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        
+        .deploy-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .deploy-btn:hover {
+            background-color: #45a049;
+        }
+        
+        .customize-btn {
+            background-color: #2c3e50;
+            color: white;
+        }
+        
+        .customize-btn:hover {
+            background-color: #1a252f;
+        }
+        
+        @media (max-width: 900px) {
+            .container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .left-panel {
+                width: 100%;
+                max-width: 500px;
+            }
+            
+            .left-panel.collapsed {
+                width: 100px;
+                margin: 0 auto;
+            }
+        }
+        
+        @media (max-width: 400px) {
+            .phone {
+                width: 280px;
+                height: 500px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .nav-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Left Panel with Q&A List -->
+        <div class="left-panel" id="leftPanel">
+            <button class="toggle-panel" id="togglePanel">-</button>
+            <div class="panel-content">
+                <h3>Your Q&A Responses</h3>
+                <ul class="qa-list" id="qaList">
+                    <!-- Will be populated by JavaScript -->
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Preview Section -->
+        <div class="preview-section">
+            <h1>Chatbot Preview</h1>
+            <p class="subtitle">Test your AI WhatsApp bot responses</p>
+            
+            <!-- Navigation Buttons -->
+            <div class="nav-buttons">
+                <a href="customize-qa-responses.html" class="nav-btn">← Back to Customization</a>
+                <a href="LandingPage.html" class="nav-btn">Home Page</a>
+            </div>
+            
+            <!-- Phone Frame with Interactive Chat -->
+            <div class="phone">
+                <div class="screen">
+                    <div class="chat-header">
+                        <button class="back-btn">←</button>
+                        AI WhatsApp Bot
+                    </div>
+                    <div class="chat-container" id="chatContainer">
+                        <!-- Initial messages will be added by JavaScript -->
+                    </div>
+                    <div class="input-area">
+                        <input type="text" class="message-input" placeholder="Type a message..." id="messageInput">
+                        <button class="send-btn" id="sendBtn">→</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button class="customize-btn" id="customizeBtn">Customize Responses</button>
+                <button class="deploy-btn" id="deployBtn">Deploy My Bot</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Enhanced business info loading from Neon DB
+        async function loadBusinessInfo() {
+            try {
+                const businessInfo = JSON.parse(localStorage.getItem('businessInfo'));
+                if (!businessInfo?.whatsappNumber) {
+                    console.log("No business info in localStorage");
+                    return {};
+                }
+
+                const response = await fetch(`/api/get-business-info?whatsappNumber=${encodeURIComponent(businessInfo.whatsappNumber)}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log("Loaded business info from DB:", data);
+                return data;
+            } catch (error) {
+                console.error("Failed to load from DB, using localStorage fallback:", error);
+                return JSON.parse(localStorage.getItem('businessInfo') || {};
+            }
+        }
+
+        // Enhanced QA data loading with Neon DB fallback
+        async function loadQA() {
+            try {
+                const businessInfo = JSON.parse(localStorage.getItem('businessInfo'));
+                if (!businessInfo?.whatsappNumber) {
+                    console.log("No business info in localStorage");
+                    return {};
+                }
+
+                const response = await fetch(`/api/get-qa?whatsappNumber=${encodeURIComponent(businessInfo.whatsappNumber)}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log("Loaded QA from DB:", data);
+                return data;
+            } catch (error) {
+                console.error("Failed to load from DB, using localStorage fallback:", error);
+                const fallbackData = JSON.parse(localStorage.getItem('customizedQA') || '{}');
+                return fallbackData;
+            }
+        }
+
+        // Get business context with defaults
+        async function getBusinessContext() {
+            const defaultContext = {
+                type: "business",
+                services: ["service 1", "service 2"],
+                priceRange: "₹X-₹Y",
+                location: "Your location",
+                workingHours: "Your working hours",
+                language: "en"
+            };
+            
+            try {
+                const storedContext = await loadBusinessInfo();
+                return {
+                    ...defaultContext,
+                    ...storedContext
+                };
+            } catch (e) {
+                console.error("Error parsing business context:", e);
+                return defaultContext;
+            }
+        }
+
+        // Initialize default responses
+        function getDefaultResponses(language, businessContext) {
+            const templates = {
+                "en": {
+                    "What are your charges?": `Our prices range from ${businessContext.priceRange}.`,
+                    "What are your working hours?": `We're open ${businessContext.workingHours}.`,
+                    "Where are you located?": `We're located at ${businessContext.location}.`,
+                    "What services do you offer?": `We offer ${businessContext.services?.join(", ") || 'various services'}.`,
+                    "Do I need an appointment?": `Appointments are recommended but walk-ins are welcome.`,
+                    "Hello": "Hello! How can I help you today?"
+                },
+                "hi": {
+                    "Aapke charges kya hain?": `Humare prices ${businessContext.priceRange} hain.`,
+                    "Aapke working hours kya hain?": `Hum ${businessContext.workingHours} tak khule hain.`,
+                    "Aap kahan sthit hain?": `Hum ${businessContext.location} par sthit hain.`,
+                    "Aap kaun si services offer karte hain?": `Hum ${businessContext.services?.join(", ") || 'various services'} offer karte hain.`,
+                    "Kya mujhe appointment ki zaroorat hai?": `Appointments recommend kiye jaate hain lekin walk-ins ka bhi swagat hai.`,
+                    "Namaste": "Namaste! Main aapki kaise madad kar sakta hoon?"
+                }
+            };
+            
+            return templates[language] || templates["en"];
+        }
+
+        // DOM elements
+        const chatContainer = document.getElementById('chatContainer');
+        const messageInput = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const customizeBtn = document.getElementById('customizeBtn');
+        const deployBtn = document.getElementById('deployBtn');
+        const leftPanel = document.getElementById('leftPanel');
+        const togglePanel = document.getElementById('togglePanel');
+        const qaList = document.getElementById('qaList');
+
+        // Application state
+        const appState = {
+            businessContext: {},
+            selectedLanguage: "en",
+            botResponses: {},
+            savedQA: {}
+        };
+
+        // Populate Q&A list
+        function populateQAList() {
+            qaList.innerHTML = '';
+            
+            const qaPairs = appState.savedQA;
+            
+            if (Object.keys(qaPairs).length === 0) {
+                const emptyItem = document.createElement('li');
+                emptyItem.className = 'qa-item';
+                emptyItem.textContent = 'No questions customized yet';
+                qaList.appendChild(emptyItem);
+                return;
+            }
+            
+            for (const [question, answer] of Object.entries(qaPairs)) {
+                const li = document.createElement('li');
+                li.className = 'qa-item';
+                li.innerHTML = `
+                    <div class="question">${question}</div>
+                    <div class="answer">${answer}</div>
+                `;
+                
+                li.addEventListener('click', () => {
+                    messageInput.value = question;
+                    messageInput.focus();
+                });
+                
+                qaList.appendChild(li);
+            }
+        }
+
+        // Toggle left panel
+        function toggleLeftPanel() {
+            leftPanel.classList.toggle('collapsed');
+            togglePanel.textContent = leftPanel.classList.contains('collapsed') ? '+' : '-';
+        }
+
+        // Add message to chat
+        function addMessage(text, sender) {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            messageDiv.innerHTML = `${text}<div class="time">${timeString}</div>`;
+            
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        // Send message
+        function sendMessage() {
+            const message = messageInput.value.trim();
+            if (message) {
+                addMessage(message, 'customer');
+                messageInput.value = '';
+                
+                setTimeout(() => {
+                    const response = getBotResponse(message);
+                    addMessage(response, 'bot');
+                }, 1000);
+            }
+        }
+
+        // Get bot response
+        function getBotResponse(userQuestion) {
+            const lowerQuestion = userQuestion.toLowerCase();
+            
+            // 1. Check exact match in saved responses
+            for (const [question, answer] of Object.entries(appState.botResponses)) {
+                if (lowerQuestion === question.toLowerCase()) {
+                    return answer;
+                }
+            }
+            
+            // 2. Keyword matching
+            const keywordMap = {
+                'price|cost|charge': appState.selectedLanguage === 'hi' ? 'Aapke charges kya hain?' : 'What are your charges?',
+                'hour|time|open|close': appState.selectedLanguage === 'hi' ? 'Aapke working hours kya hain?' : 'What are your working hours?',
+                'location|address|where': appState.selectedLanguage === 'hi' ? 'Aap kahan sthit hain?' : 'Where are you located?',
+                'service|offer|provide': appState.selectedLanguage === 'hi' ? 'Aap kaun si services offer karte hain?' : 'What services do you offer?',
+                'appointment|book|schedule': appState.selectedLanguage === 'hi' ? 'Kya mujhe appointment ki zaroorat hai?' : 'Do I need an appointment?',
+                'hello|hi|hey': appState.selectedLanguage === 'hi' ? 'Namaste' : 'Hello',
+                'thank|thanks': appState.selectedLanguage === 'hi' ? 'Aapka shukriya' : 'Thank you'
+            };
+            
+            for (const [pattern, responseKey] of Object.entries(keywordMap)) {
+                if (new RegExp(pattern).test(lowerQuestion)) {
+                    return appState.botResponses[responseKey] || 
+                           (appState.selectedLanguage === 'hi' ? 
+                            `Main aapke sawaal ka jawab de sakta hoon: ${responseKey.replace('?','')}` :
+                            `I can answer questions about ${responseKey.replace('?','').toLowerCase()}`);
+                }
+            }
+            
+            // 3. Fallback response
+            return appState.selectedLanguage === 'hi' ? 
+                   "Mujhe abhi is sawaal ka jawab nahi pata. Kripya setup mein responses customize karein." :
+                   "I'm still learning. Please customize responses for questions like this in the setup.";
+        }
+
+        // Get language-specific greeting
+        function getGreeting(language) {
+            const greetings = {
+                "en": "Hello! I'm your AI assistant. How can I help you today?",
+                "hi": "Namaste! Main aapki kaise madad kar sakta hoon?",
+                "bn": "Hello! Ami apnar kivabe shahajjo korte pari?",
+                "ta": "Vanakkam! Naan eppadi ungalukku udhavi seiyya mudiyum?",
+                "te": "Namaskaram! Nenu meeku ela sahayam chestanu?",
+                "mr": "Namaskar! Mi kashi madat karu shakto?",
+                "gu": "Namaste! Hu tamari madad kem kari shaku?",
+                "kn": "Namaskara! Nanu nimagenu tande maduvudu?",
+                "ml": "Namaskaram! Njan eppozha ningalkku sahayikkam?",
+                "pa": "Sat sri akal! Main tuhadi ki madad kar sakda haan?"
+            };
+            return greetings[language] || greetings["en"];
+        }
+
+        // Initialize the application
+        async function init() {
+            try {
+                // Load business info from DB (which includes language)
+                appState.businessContext = await getBusinessContext();
+                appState.selectedLanguage = appState.businessContext.language || "en";
+                
+                // Load QA from DB with fallback
+                appState.savedQA = await loadQA();
+                
+                // Get default responses
+                const defaultResponses = getDefaultResponses(
+                    appState.selectedLanguage, 
+                    appState.businessContext
+                );
+                
+                // Combine responses
+                appState.botResponses = {
+                    ...defaultResponses,
+                    ...appState.savedQA
+                };
+                
+                console.log("Final bot responses:", appState.botResponses);
+                
+                // Populate Q&A list
+                populateQAList();
+                
+                // Set initial greeting in the selected language
+                const greeting = getGreeting(appState.selectedLanguage);
+                addMessage(greeting, 'bot');
+                
+            } catch (error) {
+                console.error("Initialization error:", error);
+                addMessage("Failed to load bot configuration. Please try again.", 'bot');
+            }
+        }
+
+        // Event listeners
+        sendBtn.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+        
+        customizeBtn.addEventListener('click', () => {
+            window.location.href = 'customize-qa-responses.html';
+        });
+        
+        deployBtn.addEventListener('click', () => {
+            window.location.href = 'deploy-confirmation.html';
+        });
+        
+        document.querySelector('.back-btn').addEventListener('click', () => {
+            window.location.href = 'customize-qa-responses.html';
+        });
+        
+        togglePanel.addEventListener('click', toggleLeftPanel);
+
+        // Initialize the application
+        init();
+    </script>
+</body>
+</html>
