@@ -11,10 +11,29 @@ export default async (req, res) => {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
+  // Validate environment variables
+  if (!process.env.TWILIO_ACCOUNT_SID || !process.env.TWILIO_AUTH_TOKEN) {
+    return res.status(500).json({ error: "Twilio credentials not configured" });
+  }
+
   const { businessInfo, qaPairs } = req.body;
+
+  // Input validation
   if (!businessInfo?.whatsappNumber) {
     return res.status(400).json({ error: "WhatsApp number is required" });
   }
+
+  if (!businessInfo.name || !businessInfo.language) {
+    return res.status(400).json({ error: "Business name and language are required" });
+  }
+
+  if (!qaPairs || typeof qaPairs !== 'object' || Object.keys(qaPairs).length === 0) {
+    return res.status(400).json({ error: "At least one Q&A pair is required" });
+  }
+
+  // Format and validate number
+  const cleanNumber = businessInfo.whatsappNumber.replace(/\D/g, '');
+  const formattedNumber = cleanNumber.startsWith('+') ? cleanNumber : `+${cleanNumber}`;
 
   const client = new Client(process.env.DATABASE_URL);
   
@@ -37,11 +56,11 @@ export default async (req, res) => {
          language = EXCLUDED.language,
          qa_pairs = EXCLUDED.qa_pairs`,
       [
-        businessInfo.whatsappNumber,
+        formattedNumber,
         businessInfo.name,
-        businessInfo.operatingHours,
-        businessInfo.location,
-        businessInfo.businessType,
+        businessInfo.operatingHours || null,
+        businessInfo.location || null,
+        businessInfo.businessType || 'Other',
         businessInfo.language,
         qaPairs
       ]
@@ -49,27 +68,36 @@ export default async (req, res) => {
 
     // Configure Twilio webhook
     const webhookUrl = `${process.env.BASE_URL}/api/handle-message`;
-    await twilioClient.incomingPhoneNumbers
-      .list({ phoneNumber: businessInfo.whatsappNumber })
-      .then(numbers => {
-        if (numbers.length > 0) {
-          return numbers[0].update({
-            smsUrl: webhookUrl,
-            smsMethod: 'POST'
-          });
-        }
-        throw new Error("Phone number not found in Twilio account");
-      });
+    const numbers = await twilioClient.incomingPhoneNumbers.list({ phoneNumber: formattedNumber });
+
+    if (numbers.length === 0) {
+      throw new Error("Phone number not found in Twilio account");
+    }
+
+    await numbers[0].update({
+      smsUrl: webhookUrl,
+      smsMethod: 'POST',
+      smsFilters: ['inbound']
+    });
 
     return res.status(200).json({
       success: true,
-      whatsappNumber: businessInfo.whatsappNumber,
-      message: "Bot deployed successfully"
+      whatsappNumber: formattedNumber,
+      message: "Bot deployed successfully",
+      webhook: webhookUrl
     });
+
   } catch (error) {
-    console.error("Deployment error:", error);
+    console.error("Deployment error:", {
+      error: error.message,
+      number: formattedNumber,
+      endpoint: '/api/deploy-bot',
+      timestamp: new Date().toISOString()
+    });
+    
     return res.status(500).json({ 
-      error: error.message || "Bot deployment failed" 
+      error: "Bot deployment failed",
+      ...(process.env.NODE_ENV === 'development' && { details: error.message })
     });
   } finally {
     await client.end();
