@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preview Your WhatsApp Bot</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            color: #333;
+            line-height: 1.6;
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .btn {
+            display: inline-block;
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .btn-secondary {
+            background-color: #6c757d;
+            margin-right: 10px;
+        }
+        
+        .btn:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        h1, h2, h3 {
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+        
+        .header-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 8px 8px 0 0;
+            margin-bottom: 20px;
+        }
+        
+        .preview-card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+            padding: 30px;
+            margin: 40px 0;
+        }
+        
+        .business-info {
+            background-color: #f1f8ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #d1e7ff;
+        }
+        
+        .business-info p {
+            margin: 8px 0;
+            display: flex;
+        }
+        
+        .business-info strong {
+            min-width: 150px;
+            display: inline-block;
+        }
+        
+        .chat-container {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+            height: 500px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .chat-message {
+            padding: 12px 16px;
+            margin: 10px;
+            border-radius: 18px;
+            max-width: 70%;
+            word-wrap: break-word;
+        }
+        
+        .customer-message {
+            background-color: #e5f6fd;
+            margin-right: auto;
+            border-bottom-left-radius: 4px;
+        }
+        
+        .bot-message {
+            background-color: #dcf8c6;
+            margin-left: auto;
+            border-bottom-right-radius: 4px;
+        }
+        
+        .message-time {
+            font-size: 0.7rem;
+            color: #666;
+            margin-top: 4px;
+            text-align: right;
+        }
+        
+        .test-input {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .test-input input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        
+        .test-input input:focus {
+            border-color: #4CAF50;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+        }
+        
+        .progress-steps {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+        
+        .step {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background-color: #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-weight: bold;
+            position: relative;
+            margin: 0 20px;
+        }
+        
+        .step.completed {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            width: 40px;
+            height: 3px;
+            background-color: #ddd;
+            left: 100%;
+        }
+        
+        .step.completed:not(:last-child)::after {
+            background-color: #4CAF50;
+        }
+        
+        .error-message {
+            color: #dc3545;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .preview-card {
+                padding: 20px;
+            }
+            
+            .business-info p {
+                flex-direction: column;
+            }
+            
+            .business-info strong {
+                min-width: auto;
+                margin-bottom: 4px;
+            }
+            
+            .step {
+                width: 30px;
+                height: 30px;
+                font-size: 0.9rem;
+                margin: 0 12px;
+            }
+            
+            .step:not(:last-child)::after {
+                width: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="progress-steps">
+            <div class="step completed">1</div>
+            <div class="step completed">2</div>
+            <div class="step completed">3</div>
+        </div>
+        
+        <div class="header-image-placeholder" style="background: linear-gradient(45deg, #4CAF50, #2196F3); height: 200px; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; color: white; font-size: 1.5rem; text-align: center;">
+            <div>Preview Your WhatsApp Bot</div>
+        </div>
+        
+        <div class="preview-card">
+            <h2>Your WhatsApp AI Assistant is Ready!</h2>
+            <p>Test how your bot will respond to customer questions:</p>
+            
+            <div class="business-info" id="businessInfoDisplay">
+                <p><strong>Business Name:</strong> <span id="previewBusinessName">Loading...</span></p>
+                <p><strong>WhatsApp Number:</strong> <span id="previewWhatsAppNumber">Loading...</span></p>
+                <p><strong>Business Type:</strong> <span id="previewBusinessType">Loading...</span></p>
+            </div>
+            
+            <div id="errorContainer"></div>
+            
+            <div class="chat-container" id="chatContainer">
+                <!-- Chat messages will appear here -->
+                <div class="chat-message bot-message">
+                    Hello! Thanks for contacting us. How can I help you today?
+                    <div class="message-time">Just now</div>
+                </div>
+            </div>
+            
+            <div class="test-input">
+                <input type="text" id="testQuestionInput" placeholder="Type a question to test your bot...">
+                <button class="btn" id="testButton">Test</button>
+            </div>
+            
+            <div class="button-container" style="margin-top: 30px;">
+                <button type="button" class="btn btn-secondary" id="backButton">← Back to Edit</button>
+                <button type="button" class="btn" id="activateButton">Activate My Bot →</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const elements = {
+            businessName: document.getElementById('previewBusinessName'),
+            whatsAppNumber: document.getElementById('previewWhatsAppNumber'),
+            businessType: document.getElementById('previewBusinessType'),
+            chatContainer: document.getElementById('chatContainer'),
+            testQuestionInput: document.getElementById('testQuestionInput'),
+            testButton: document.getElementById('testButton'),
+            backButton: document.getElementById('backButton'),
+            activateButton: document.getElementById('activateButton'),
+            errorContainer: document.getElementById('errorContainer')
+        };
+
+        // State
+        let state = {
+            businessInfo: null,
+            qaPairs: {},
+            businessType: ''
+        };
+
+        // Initialize
+        function initialize() {
+            // Load data from localStorage
+            const previewData = JSON.parse(localStorage.getItem('previewData'));
+            
+            if (!previewData) {
+                showError("No preview data found. Please complete the setup first.");
+                elements.backButton.textContent = "← Go to Setup";
+                elements.backButton.onclick = () => window.location.href = 'business-info.html';
+                return;
+            }
+
+            state.businessInfo = previewData.businessInfo;
+            state.qaPairs = previewData.qaPairs;
+            state.businessType = previewData.businessType;
+
+            // Display business info
+            displayBusinessInfo();
+            
+            // Set up event listeners
+            elements.testButton.addEventListener('click', handleTestQuestion);
+            elements.testQuestionInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') handleTestQuestion();
+            });
+            elements.backButton.addEventListener('click', () => {
+                window.location.href = 'customize-qa-responses.html';
+            });
+            elements.activateButton.addEventListener('click', handleActivation);
+        }
+
+        function displayBusinessInfo() {
+            elements.businessName.textContent = state.businessInfo.name || 'Not specified';
+            elements.whatsAppNumber.textContent = state.businessInfo.whatsappNumber || 'Not set';
+            elements.businessType.textContent = state.businessType || 'Not specified';
+        }
+
+        function showError(message) {
+            elements.errorContainer.innerHTML = `
+                <div class="error-message">
+                    <strong>Error:</strong> ${message}
+                </div>
+            `;
+            console.error(message);
+        }
+
+        function handleTestQuestion() {
+            const question = elements.testQuestionInput.value.trim();
+            if (!question) {
+                showError("Please enter a question to test");
+                return;
+            }
+
+            // Add customer message to chat
+            addMessageToChat(question, 'customer');
+            
+            // Find matching answer
+            const answer = findAnswer(question);
+            
+            // Simulate typing delay
+            setTimeout(() => {
+                addMessageToChat(answer, 'bot');
+                elements.chatContainer.scrollTop = elements.chatContainer.scrollHeight;
+            }, 1000);
+            
+            elements.testQuestionInput.value = '';
+        }
+
+        function findAnswer(question) {
+            // Check for exact match first
+            if (state.qaPairs[question]) {
+                return state.qaPairs[question];
+            }
+            
+            // Check for partial matches
+            const qLower = question.toLowerCase();
+            for (const [key, value] of Object.entries(state.qaPairs)) {
+                if (key.toLowerCase().includes(qLower) {
+                    return value;
+                }
+            }
+            
+            // Default response
+            return "Thank you for your question. We'll respond shortly during our business hours.";
+        }
+
+        function addMessageToChat(message, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chat-message ${sender}-message`;
+            
+            const now = new Date();
+            const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            messageDiv.innerHTML = `
+                ${message}
+                <div class="message-time">${timeString}</div>
+            `;
+            
+            elements.chatContainer.appendChild(messageDiv);
+            elements.chatContainer.scrollTop = elements.chatContainer.scrollHeight;
+        }
+
+        async function handleActivation() {
+            elements.activateButton.disabled = true;
+            elements.activateButton.innerHTML = 'Activating...';
+            
+            try {
+                // Save activation to server
+                const response = await fetch('/api/activate-bot', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        whatsappNumber: state.businessInfo.whatsappNumber,
+                        businessInfo: state.businessInfo,
+                        qaPairs: state.qaPairs
+                    })
+                });
+                
+                if (!response.ok) throw new Error('Activation failed');
+                
+                // Redirect to success page or dashboard
+                window.location.href = 'activation-success.html';
+            } catch (error) {
+                showError("Activation failed. Please try again.");
+                console.error("Activation error:", error);
+                elements.activateButton.disabled = false;
+                elements.activateButton.textContent = 'Activate My Bot →';
+            }
+        }
+
+        // Start the preview
+        document.addEventListener('DOMContentLoaded', initialize);
+    </script>
+</body>
+</html>
