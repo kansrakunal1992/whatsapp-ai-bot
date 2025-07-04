@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customize Q&A - AI WhatsApp Automation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            color: #333;
+            line-height: 1.6;
+            background-color: #f8f9fa;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .btn {
+            display: inline-block;
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .btn-secondary {
+            background-color: #6c757d;
+            margin-right: 10px;
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid #4CAF50;
+            color: #4CAF50;
+        }
+        
+        .btn-outline:hover {
+            background-color: #f1f8e9;
+        }
+        
+        .btn:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        h1, h2, h3 {
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+        
+        .header-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 8px 8px 0 0;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .setup-card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+            padding: 30px;
+            margin: 40px 0;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .setup-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .form-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .form-header h2 {
+            color: #4CAF50;
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+        
+        .form-header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+        
+        .business-type-display {
+            background-color: #e8f5e9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+            border-left: 4px solid #4CAF50;
+        }
+        
+        .business-info-display {
+            background-color: #f1f8ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            border: 1px solid #d1e7ff;
+        }
+        
+        .business-info-display p {
+            margin: 8px 0;
+            display: flex;
+        }
+        
+        .business-info-display strong {
+            min-width: 150px;
+            display: inline-block;
+        }
+        
+        .qa-container {
+            display: flex;
+            gap: 30px;
+        }
+        
+        .questions-column {
+            flex: 1;
+        }
+        
+        .answers-column {
+            flex: 1;
+        }
+        
+        .questions-list {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+            max-height: 500px;
+            overflow-y: auto;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+        }
+        
+        .question-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        
+        .question-item:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .question-item.active {
+            background-color: #e8f5e9;
+            border-left: 4px solid #4CAF50;
+        }
+        
+        .answer-editor {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+        }
+        
+        .answer-editor h4 {
+            color: #4CAF50;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+        
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            min-height: 150px;
+            resize: vertical;
+            margin-bottom: 15px;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+        
+        textarea:focus {
+            border-color: #4CAF50;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+        }
+        
+        .add-qa {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .add-qa input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        .add-qa input:focus {
+            border-color: #4CAF50;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+        }
+        
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        
+        .progress-steps {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+        
+        .step {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background-color: #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-weight: bold;
+            position: relative;
+            margin: 0 20px;
+            z-index: 2;
+            transition: all 0.3s ease;
+        }
+        
+        .step.active {
+            background-color: #4CAF50;
+            color: white;
+            transform: scale(1.1);
+        }
+        
+        .step.completed {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            width: 40px;
+            height: 3px;
+            background-color: #ddd;
+            left: 100%;
+            z-index: 1;
+        }
+        
+        .step.completed:not(:last-child)::after {
+            background-color: #4CAF50;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+        
+        .language-selector {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .language-selector select {
+            padding: 10px 15px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            font-size: 1rem;
+            background-color: white;
+            flex-grow: 1;
+            transition: border-color 0.3s;
+        }
+        
+        .language-selector select:focus {
+            border-color: #4CAF50;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+        }
+        
+        .error-message {
+            color: #dc3545;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .error-message button {
+            align-self: flex-end;
+            margin-top: 10px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 768px) {
+            .qa-container {
+                flex-direction: column;
+            }
+            
+            .container {
+                padding: 15px;
+            }
+            
+            .setup-card {
+                padding: 20px;
+            }
+            
+            .button-container {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .button-container .btn {
+                width: 100%;
+                margin-right: 0;
+            }
+            
+            .step {
+                width: 30px;
+                height: 30px;
+                font-size: 0.9rem;
+                margin: 0 12px;
+            }
+            
+            .step:not(:last-child)::after {
+                width: 25px;
+            }
+            
+            .business-info-display p {
+                flex-direction: column;
+            }
+            
+            .business-info-display strong {
+                min-width: auto;
+                margin-bottom: 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="progress-steps">
+            <div class="step completed">1</div>
+            <div class="step active">2</div>
+            <div class="step">3</div>
+        </div>
+        
+        <div class="header-image-placeholder" style="background: linear-gradient(45deg, #4CAF50, #2196F3); height: 200px; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; color: white; font-size: 1.5rem; text-align: center;">
+            <div>Customize Your WhatsApp Responses</div>
+        </div>
+        
+        <div class="setup-card">
+            <div class="form-header">
+                <h2>Customize Q&A Responses</h2>
+                <p>Edit the AI-generated answers for common customer questions</p>
+            </div>
+            
+            <div class="business-type-display" id="businessTypeDisplay">
+                Business Type: Loading...
+            </div>
+            
+            <div id="errorContainer"></div>
+            
+            <div class="business-info-display" id="businessInfoDisplay">
+                <p><strong>Business Name:</strong> <span id="previewBusinessName">Loading...</span></p>
+                <p><strong>WhatsApp Number:</strong> <span id="previewWhatsAppNumber">Loading...</span></p>
+                <p><strong>Working Hours:</strong> <span id="previewWorkingHours">Loading...</span></p>
+                <p><strong>Location:</strong> <span id="previewLocation">Loading...</span></p>
+            </div>
+            
+            <div class="qa-container">
+                <div class="questions-column">
+                    <h3>Common Customer Questions</h3>
+                    <div class="questions-list" id="questionsList">
+                        <!-- Questions will be populated dynamically -->
+                    </div>
+                    
+                    <div class="add-qa">
+                        <input type="text" placeholder="Add new question..." id="newQuestionInput">
+                        <button class="btn btn-outline" id="addQuestionBtn">+ Add</button>
+                    </div>
+                </div>
+                
+                <div class="answers-column">
+                    <div class="answer-editor">
+                        <div class="language-selector">
+                            <label for="answerLanguage">Answer Language:</label>
+                            <select id="answerLanguage">
+                                <!-- Options will be populated dynamically -->
+                            </select>
+                        </div>
+                        <h4>Edit Answer</h4>
+                        <p><strong>Customer Question:</strong> <span id="current-question">Select a question</span></p>
+                        <textarea id="ai-answer" placeholder="Select a question to edit its answer"></textarea>
+                        <button class="btn" id="regenerateBtn">
+                            <span id="regenerateText">Regenerate Answer</span>
+                            <span id="regenerateSpinner" class="spinner" style="display: none;"></span>
+                        </button>
+                        <small class="hint">AI-generated answer. Edit to match your business tone.</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="button-container">
+                <button type="button" class="btn btn-secondary" id="backButton">← Back</button>
+                <button type="button" class="btn" id="previewBtn">Preview My Bot →</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+    // Complete Language Resources (Roman Script)
+    const languageResources = {
+        "en": { 
+            name: "English", 
+            questions: {
+                "What are your opening hours?": "We're open {workingHours}.",
+                "Where are you located?": "We're located at {location}.",
+                "What are your charges?": "Our prices start from {priceRange}.",
+                "Do I need an appointment?": "Appointments are recommended but walk-ins are welcome when available.",
+                "What payment methods do you accept?": "We accept cash, cards, UPI, and mobile wallets.",
+                "What services do you offer?": "We offer {services}.",
+                "Do you have any discounts?": "We offer special discounts for {discountGroups}."
+            }
+        },
+        "hi": { 
+            name: "Hindi", 
+            questions: {
+                "Aapke khulne ka samay kya hai?": "Hum {workingHours} tak khule hain.",
+                "Aap kahan sthit hain?": "Hum {location} par sthit hain.",
+                "Aapke charges kya hain?": "Humare prices {priceRange} se shuru hote hain.",
+                "Kya mujhe appointment ki zaroorat hai?": "Appointments recommend kiye jaate hain lekin walk-ins ka bhi swagat hai.",
+                "Aap kaunse payment methods accept karte hain?": "Hum cash, cards, UPI, aur mobile wallets accept karte hain.",
+                "Aap kaunsi services provide karte hain?": "Hum {services} provide karte hain.",
+                "Kya aapke paas koi discounts hain?": "Hum {discountGroups} ke liye special discounts provide karte hain."
+            }
+        },
+        "bn": {
+            name: "Bengali",
+            questions: {
+                "Aapnar khulbar somoy ki?": "Amra {workingHours} porjonto khuli.",
+                "Aapnar location kothay?": "Amra {location} e achi.",
+                "Aapnar charges koto?": "Amader prices {priceRange} theke shuru.",
+                "Ki amake appointment nite hobe?": "Appointments recommend kora hoy kintu walk-ins o shohojoggo.",
+                "Aapni kon kon payment method accept koren?": "Amra cash, cards, UPI, o mobile wallets accept kori.",
+                "Aapni ki ki service provide koren?": "Amra {services} provide kori.",
+                "Aapnar kono discount ache?": "Amra {discountGroups} der jonno special discount offer kori."
+            }
+        },
+        "te": {
+            name: "Telugu",
+            questions: {
+                "Mee opening time emiti?": "Memu {workingHours} varaku open ga untamu.",
+                "Meeru ekkada unnaru?": "Memu {location} lo unnamu.",
+                "Mee charges enti?": "Maa rates {priceRange} nundi start avutayi.",
+                "Naku appointment avasarama?": "Appointments recommend chestamu kani available unte walk-ins welcome.",
+                "Meeru emi payment methods accept chestaru?": "Memu cash, cards, UPI, and mobile wallets accept chestamu.",
+                "Meeru emi services istunnaru?": "Memu {services} istunnamu.",
+                "Mee daggara emaina discounts unnaya?": "Memu {discountGroups} kosam special discounts istunnamu."
+            }
+        },
+        "mr": {
+            name: "Marathi",
+            questions: {
+                "Tumche opening time kay ahe?": "Aamhi {workingHours} paryant open aahot.",
+                "Tumhi kuthe sthit aahat?": "Aamhi {location} la sthit aahot.",
+                "Tumche charges kay ahet?": "Aamchya prices {priceRange} pasun suru hotat.",
+                "Mala appointment ghyaychi garaj ahe ka?": "Appointments suggest kele jatat pan available asel tar walk-ins welcome ahet.",
+                "Tumhi konte payment methods accept karta?": "Aamhi cash, cards, UPI, ani mobile wallets accept karto.",
+                "Tumhi konte services deta?": "Aamhi {services} deto.",
+                "Tumchya kade koni discounts ahet ka?": "Aamhi {discountGroups} sathi special discounts deto."
+            }
+        },
+        "ta": {
+            name: "Tamil",
+            questions: {
+                "Ungal opening time enna?": "Naanga {workingHours} varai open iruppom.",
+                "Neeenga enge irukeenga?": "Naanga {location} la irukkom.",
+                "Unga charges enna?": "Enga prices {priceRange} irundhu thodangum.",
+                "Enakku appointment venuma?": "Appointment recommend panrom, anaala available na walk-ins welcome.",
+                "Neeenga enna payment methods accept panreenga?": "Naanga cash, cards, UPI, mobile wallets accept panrom.",
+                "Neeenga enna services kodukkreenga?": "Naanga {services} kodukkirom.",
+                "Ungalukku discounts irukka?": "Naanga {discountGroups} ku special discounts kodukkirom."
+            }
+        },
+        "gu": {
+            name: "Gujarati",
+            questions: {
+                "Tamaru opening time su che?": "Ame {workingHours} sudhi khulla chhiye.",
+                "Tame kya sthit chho?": "Ame {location} par sthit chhiye.",
+                "Tamara charges su che?": "Amara prices {priceRange} thi start thay che.",
+                "Mane appointment jovu jaruri che?": "Appointments recommend kariye che pan available hoy to walk-ins welcome che.",
+                "Tame kon payment methods accept karo cho?": "Ame cash, cards, UPI, ane mobile wallets accept kariye che.",
+                "Tame kon services aapo cho?": "Ame {services} aapiye che.",
+                "Tamari pase koi discount che?": "Ame {discountGroups} mate special discount aapiye che."
+            }
+        },
+        "kn": {
+            name: "Kannada",
+            questions: {
+                "Nimma opening time enu?": "Naavu {workingHours} varege open iddeve.",
+                "Neenu elli ideeya?": "Naavu {location} alli ideevi.",
+                "Nimma charges enu?": "Namma rates {priceRange} inda suru agutte.",
+                "Nanage appointment beku?": "Appointments recommend maadodu adare available idre walk-ins welcome.",
+                "Neenu enu payment methods accept maadtira?": "Naavu cash, cards, UPI, mattu mobile wallets accept maadteve.",
+                "Neenu enu services kodtira?": "Naavu {services} kodteve.",
+                "Nimage yavude discounts ideya?": "Naavu {discountGroups} ge special discounts kodteve."
+            }
+        },
+        "ml": {
+            name: "Malayalam",
+            questions: {
+                "Ningalude opening time entha?": "Njangal {workingHours} vare open aayirikkum.",
+                "Ningal evideya?": "Njangal {location} il aanu.",
+                "Ningalude charges entha?": "Njangalude rates {priceRange} nundi thudangunnu.",
+                "Enikku appointment veno?": "Appointments recommend cheyyunnu pakshe available unenkil walk-ins welcome.",
+                "Ningal entha payment methods accept cheyyunnu?": "Njangal cash, cards, UPI, mobile wallets okke accept cheyyunnu.",
+                "Ningal entha services nalkunnu?": "Njangal {services} nalkunnu.",
+                "Ningalude koode discount undo?": "Njangal {discountGroups} inu special discounts nalkunnu."
+            }
+        },
+        "pa": {
+            name: "Punjabi",
+            questions: {
+                "Tuhada opening time ki hai?": "Asi {workingHours} tak khulle haan.",
+                "Tusi kithe sthit ho?": "Asi {location} vich sthit haan.",
+                "Tuhade charges ki ne?": "Sade prices {priceRange} ton shuru hunde ne.",
+                "Mainu appointment di lod hai?": "Appointments recommend kitian jandian par available hon te walk-ins welcome ne.",
+                "Tusi kon payment methods accept karde ho?": "Asi cash, cards, UPI, te mobile wallets accept karde haan.",
+                "Tusi kon services dinde ho?": "Asi {services} dinde haan.",
+                "Tuhade kol koi discounts ne?": "Asi {discountGroups} layi special discounts dinde haan."
+            }
+        },
+        "or": {
+            name: "Odia",
+            questions: {
+                "Tumar opening time kana?": "Aame {workingHours} porjonto khula thiba.",
+                "Tume kahinki sthit?": "Aame {location} re sthit.",
+                "Tumar charges kana?": "Aamar prices {priceRange} ru start heba.",
+                "Mu appointment neba ki?": "Appointments recommend kariba kintu available thile walk-ins welcome.",
+                "Tume kana payment methods accept kara?": "Aame cash, cards, UPI, au mobile wallets accept kari.",
+                "Tume kana services deiba?": "Aame {services} deiba.",
+                "Tumar kache kana discounts achi?": "Aame {discountGroups} pain special discounts deiba."
+            }
+        }
+    };
+
+    // Business configurations
+    const businessConfigurations = {
+        "Salon": { 
+            priceRange: "₹500-₹3000",
+            services: "haircuts, coloring, styling, facials, and other beauty treatments",
+            discountGroups: "students, seniors, and regular customers"
+        },
+        "Tutor": {
+            priceRange: "₹300-₹1500 per hour",
+            services: "academic tutoring, test preparation, and skill development",
+            discountGroups: "group sessions and long-term commitments"
+        },
+        "Doctor": {
+            priceRange: "₹500-₹2000 per consultation",
+            services: "general consultations, specialist visits, and basic diagnostic tests",
+            discountGroups: "seniors and follow-up visits"
+        },
+        "Other": {
+            priceRange: "Varies",
+            services: "various services tailored to your needs",
+            discountGroups: "regular customers"
+        }
+    };
+
+    // DOM Elements
+    const elements = {
+        businessTypeDisplay: document.getElementById('businessTypeDisplay'),
+        businessInfoDisplay: document.getElementById('businessInfoDisplay'),
+        previewBusinessName: document.getElementById('previewBusinessName'),
+        previewWhatsAppNumber: document.getElementById('previewWhatsAppNumber'),
+        previewWorkingHours: document.getElementById('previewWorkingHours'),
+        previewLocation: document.getElementById('previewLocation'),
+        currentQuestion: document.getElementById('current-question'),
+        aiAnswer: document.getElementById('ai-answer'),
+        addQuestionBtn: document.getElementById('addQuestionBtn'),
+        newQuestionInput: document.getElementById('newQuestionInput'),
+        questionsList: document.getElementById('questionsList'),
+        regenerateBtn: document.getElementById('regenerateBtn'),
+        regenerateText: document.getElementById('regenerateText'),
+        regenerateSpinner: document.getElementById('regenerateSpinner'),
+        previewBtn: document.getElementById('previewBtn'),
+        answerLanguageSelect: document.getElementById('answerLanguage'),
+        errorContainer: document.getElementById('errorContainer'),
+        backButton: document.getElementById('backButton')
+    };
+
+    // State Management
+    let state = {
+        businessContext: {},
+        qaPairs: {},
+        currentLanguage: 'en',
+        businessType: 'Other'
+    };
+
+    // Initialize language selector
+    function initializeLanguageSelector() {
+        elements.answerLanguageSelect.innerHTML = '';
+        Object.entries(languageResources).forEach(([code, lang]) => {
+            const option = document.createElement('option');
+            option.value = code;
+            option.textContent = lang.name;
+            elements.answerLanguageSelect.appendChild(option);
+        });
+    }
+
+    // Load business data with hybrid approach (localStorage + server)
+    async function loadBusinessData() {
+        try {
+            // First try to load from localStorage for quick display
+            const localData = JSON.parse(localStorage.getItem('businessInfo')) || {};
+            const businessType = localStorage.getItem('businessType') || 'Other';
+            
+            // Then verify with server (Neon DB)
+            let serverData = {};
+            if (localData.whatsappNumber) {
+                try {
+                    const response = await fetch(`/api/get-business-info?whatsappNumber=${localData.whatsappNumber}`);
+                    if (response.ok) {
+                        serverData = await response.json();
+                    }
+                } catch (error) {
+                    console.warn('Failed to fetch from server, using local data:', error);
+                }
+            }
+            
+            // Update display
+            elements.businessTypeDisplay.textContent = `Business Type: ${businessType}`;
+            elements.previewBusinessName.textContent = serverData.business_name || localData.name || 'Not specified';
+            elements.previewWhatsAppNumber.textContent = serverData.whatsapp_number || localData.whatsappNumber || 'Not set';
+            
+            // Format working hours
+            const workingHours = serverData.operating_hours || localData.operatingHours;
+            if (workingHours) {
+                const hours = formatWorkingHours(workingHours);
+                elements.previewWorkingHours.textContent = hours;
+            } else {
+                elements.previewWorkingHours.textContent = 'Not specified';
+            }
+            
+            elements.previewLocation.textContent = serverData.location || localData.location || 'Not specified';
+            
+            return {
+                ...businessConfigurations[businessType],
+                ...serverData, // Server data takes precedence
+                ...localData,  // Local data fills any gaps
+                workingHours: formatWorkingHours(workingHours),
+                language: serverData.language || localData.language || 'English',
+                businessType
+            };
+        } catch (e) {
+            console.error('Error loading business data:', e);
+            showError("Failed to load business data. Please complete the setup form first.");
+            return null;
+        }
+    }
+
+    // Format working hours
+    function formatWorkingHours(hours) {
+        if (!hours || (!hours.opening && !hours.closing)) return "our business hours";
+        if (typeof hours === 'object') {
+            return `from ${formatTime(hours.opening)} to ${formatTime(hours.closing)}`;
+        }
+        return hours; // In case it's already formatted
+    }
+
+    // Format time
+    function formatTime(timeString) {
+        if (!timeString) return "";
+        if (timeString.includes('AM') || timeString.includes('PM')) {
+            return timeString; // Already formatted
+        }
+        const [hours, minutes] = timeString.split(':');
+        const hour = parseInt(hours);
+        const ampm = hour >= 12 ? 'PM' : 'AM';
+        const displayHour = hour % 12 || 12;
+        return `${displayHour}:${minutes} ${ampm}`;
+    }
+
+    // Process templates with business context
+    function processTemplates(questions) {
+        const processed = {};
+        for (const [q, a] of Object.entries(questions)) {
+            processed[q] = a.replace(/\{(\w+)\}/g, (_, key) => 
+                state.businessContext[key] || `{${key}}`);
+        }
+        return processed;
+    }
+
+    // Render questions list
+    function renderQuestions() {
+        elements.questionsList.innerHTML = '';
+        
+        if (!state.qaPairs || Object.keys(state.qaPairs).length === 0) {
+            const emptyItem = document.createElement('div');
+            emptyItem.className = 'question-item';
+            emptyItem.textContent = 'No questions available. Please add some.';
+            elements.questionsList.appendChild(emptyItem);
+            return;
+        }
+        
+        Object.keys(state.qaPairs).forEach((question, index) => {
+            const item = document.createElement('div');
+            item.className = 'question-item';
+            if (index === 0 && !document.querySelector('.question-item.active')) {
+                item.classList.add('active');
+                elements.currentQuestion.textContent = question;
+                elements.aiAnswer.value = state.qaPairs[question] || '';
+            }
+            
+            item.textContent = question;
+            
+            item.addEventListener('click', () => {
+                document.querySelectorAll('.question-item').forEach(q => q.classList.remove('active'));
+                item.classList.add('active');
+                elements.currentQuestion.textContent = question;
+                elements.aiAnswer.value = state.qaPairs[question] || '';
+            });
+            
+            elements.questionsList.appendChild(item);
+        });
+        
+        if (elements.questionsList.children.length > 0 && 
+            !document.querySelector('.question-item.active')) {
+            elements.questionsList.children[0].classList.add('active');
+            const firstQuestion = elements.questionsList.children[0].textContent;
+            elements.currentQuestion.textContent = firstQuestion;
+            elements.aiAnswer.value = state.qaPairs[firstQuestion] || '';
+        }
+    }
+
+    // Handle adding new question
+    function handleAddQuestion() {
+        const question = elements.newQuestionInput.value.trim();
+        if (!question) {
+            showError("Please enter a question");
+            return;
+        }
+        
+        if (state.qaPairs[question]) {
+            showError("This question already exists!");
+            return;
+        }
+        
+        state.qaPairs[question] = generateAnswerForNewQuestion(question);
+        renderQuestions();
+        elements.newQuestionInput.value = '';
+        
+        // Scroll to new question
+        const items = document.querySelectorAll('.question-item');
+        if (items.length > 0) {
+            items[items.length - 1].click();
+            items[items.length - 1].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    }
+
+    // Generate answer for new question
+    function generateAnswerForNewQuestion(question) {
+        const q = question.toLowerCase();
+        
+        if (q.includes('hour') || q.includes('time') || q.includes('open')) {
+            return `Our business hours are ${state.businessContext.workingHours}.`;
+        }
+        if (q.includes('location') || q.includes('address') || q.includes('where')) {
+            return `We're located at ${state.businessContext.location || 'your location'}.`;
+        }
+        if (q.includes('price') || q.includes('cost') || q.includes('charge')) {
+            return `Our prices range from ${state.businessContext.priceRange}.`;
+        }
+        if (q.includes('service') || q.includes('offer') || q.includes('provide')) {
+            return `We offer ${state.businessContext.services || 'various services'}.`;
+        }
+        if (q.includes('discount') || q.includes('offer') || q.includes('deal')) {
+            return `We offer special discounts for ${state.businessContext.discountGroups || 'eligible customers'}.`;
+        }
+        
+        return "Thank you for your question. We'll respond shortly during our business hours.";
+    }
+
+    // Handle regenerating answer
+    async function handleRegenerateAnswer() {
+        const question = elements.currentQuestion.textContent;
+        if (!question || question === 'Select a question') return;
+        
+        elements.regenerateBtn.disabled = true;
+        elements.regenerateText.textContent = "Generating...";
+        elements.regenerateSpinner.style.display = "inline-block";
+        
+        try {
+            const currentAnswer = elements.aiAnswer.value;
+            const businessContext = {
+                ...state.businessContext,
+                name: state.businessContext.name || 'Business'
+            };
+
+            const response = await fetch('/api/regenerate-answer', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    question,
+                    currentAnswer,
+                    businessContext,
+                    language: elements.answerLanguageSelect.value
+                })
+            });
+
+            if (!response.ok) throw new Error('Failed to regenerate answer');
+
+            const data = await response.json();
+            state.qaPairs[question] = data.answer;
+            elements.aiAnswer.value = data.answer;
+            
+            showSuccess('Answer regenerated successfully!');
+        } catch (error) {
+            showError("Failed to regenerate answer: " + error.message);
+        } finally {
+            elements.regenerateBtn.disabled = false;
+            elements.regenerateText.textContent = "Regenerate Answer";
+            elements.regenerateSpinner.style.display = "none";
+        }
+    }
+
+    // Handle preview button click
+    async function handlePreview() {
+        const question = elements.currentQuestion.textContent;
+        if (question && question !== 'Select a question' && elements.aiAnswer.value) {
+            state.qaPairs[question] = elements.aiAnswer.value;
+        }
+        
+        if (Object.keys(state.qaPairs).length === 0) {
+            showError("Please add at least one Q&A pair before previewing");
+            return;
+        }
+        
+        // Show language confirmation
+        const selectedLangCode = elements.answerLanguageSelect.value; // e.g., "hi"
+const selectedLangName = languageResources[selectedLangCode]?.name; // e.g., "Hindi"
+const businessLangName = state.businessContext.language; // e.g., "Hindi"
+
+// Debug logs (optional but recommended)
+console.log("[Debug] Selected Language Code:", selectedLangCode);
+console.log("[Debug] Selected Language Name:", selectedLangName);
+console.log("[Debug] Business Language Name:", businessLangName);
+
+// Compare names directly
+if (selectedLangName !== businessLangName) {
+    if (!confirm(`Preview will show responses in ${businessLangName} (as set in your business info). Continue?`)) {
+        return; // User clicked "Cancel"
+    }
+}
+        
+        try {
+            // Save to localStorage for preview
+            localStorage.setItem('previewData', JSON.stringify({
+                businessInfo: state.businessContext,
+                qaPairs: state.qaPairs,
+                businessType: state.businessType
+            }));
+            
+            // Save to server
+            const saveResponse = await fetch('/api/save-qa', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    whatsappNumber: state.businessContext.whatsappNumber,
+                    qaPairs: state.qaPairs
+                })
+            });
+            
+            if (!saveResponse.ok) {
+                throw new Error('Failed to save Q&A data');
+            }
+            
+            window.location.href = 'preview.html';
+        } catch (error) {
+            showError("Failed to save Q&A data: " + error.message);
+        }
+    }
+
+    // Handle language change
+    function handleLanguageChange() {
+        const newLang = this.value;
+        if (newLang === state.currentLanguage) return;
+        
+        const newBaseSet = processTemplates(languageResources[newLang].questions);
+        state.currentLanguage = newLang;
+        state.qaPairs = newBaseSet;
+        
+        renderQuestions();
+        showSuccess(`Switched to ${languageResources[newLang].name} questions`);
+    }
+
+    // Show error message
+    function showError(message) {
+        elements.errorContainer.innerHTML = `
+            <div class="error-message">
+                <strong>Error:</strong> ${message}
+                <button onclick="this.parentElement.remove()" class="btn btn-outline" style="margin-top: 10px;">Dismiss</button>
+            </div>
+        `;
+    }
+
+    // Show success message
+    function showSuccess(message) {
+        const successMsg = document.createElement('div');
+        successMsg.className = 'error-message';
+        successMsg.style.background = '#d4edda';
+        successMsg.style.borderColor = '#c3e6cb';
+        successMsg.style.color = '#155724';
+        successMsg.innerHTML = `<strong>Success:</strong> ${message}`;
+        elements.errorContainer.innerHTML = '';
+        elements.errorContainer.appendChild(successMsg);
+        
+        setTimeout(() => successMsg.remove(), 3000);
+    }
+
+    // Initialize the page
+    async function initialize() {
+        state.businessContext = await loadBusinessData();
+        if (!state.businessContext) {
+            setTimeout(() => window.location.href = 'business-info.html', 2000);
+            return;
+        }
+        
+        // Set language from business info
+        const langCode = Object.keys(languageResources).find(code => 
+            languageResources[code].name === state.businessContext.language);
+        state.currentLanguage = langCode || 'en';
+        state.businessType = state.businessContext.businessType || 'Other';
+        
+        // Initialize UI
+        initializeLanguageSelector();
+        elements.answerLanguageSelect.value = state.currentLanguage;
+        
+        // Load Q&A pairs
+        const baseSet = processTemplates(languageResources[state.currentLanguage].questions);
+        state.qaPairs = baseSet;
+        
+        renderQuestions();
+        
+        // Event listeners
+        elements.addQuestionBtn.addEventListener('click', handleAddQuestion);
+        elements.regenerateBtn.addEventListener('click', handleRegenerateAnswer);
+        elements.aiAnswer.addEventListener('blur', () => {
+            const question = elements.currentQuestion.textContent;
+            if (question && question !== 'Select a question') {
+                state.qaPairs[question] = elements.aiAnswer.value;
+            }
+        });
+        elements.previewBtn.addEventListener('click', handlePreview);
+        elements.answerLanguageSelect.addEventListener('change', handleLanguageChange);
+        elements.backButton.addEventListener('click', () => {
+            window.location.href = 'business-info.html';
+        });
+
+        // Periodic sync with server (every 5 minutes)
+        setInterval(async () => {
+            if (navigator.onLine && state.businessContext?.whatsappNumber) {
+                try {
+                    const response = await fetch(`/api/get-business-info?whatsappNumber=${state.businessContext.whatsappNumber}`);
+                    if (response.ok) {
+                        const serverData = await response.json();
+                        localStorage.setItem('businessInfo', JSON.stringify({
+                            ...JSON.parse(localStorage.getItem('businessInfo') || {}),
+                            ...serverData
+                        }));
+                    }
+                } catch (error) {
+                    console.warn('Background sync failed:', error);
+                }
+            }
+        }, 300000); // 5 minutes
+    }
+
+    // Start the application
+    document.addEventListener('DOMContentLoaded', initialize);
+</script>
+</body>
+</html>
