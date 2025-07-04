@@ -37,9 +37,29 @@ export default async (req, res) => {
       recognizedSandboxNumbers: SANDBOX_NUMBERS
     });
 
-    // 3. FIND BUSINESS CONFIG
+    // 2.5 DUPLICATE MESSAGE CHECK
     await client.connect();
+    const messageId = req.body.MessageSid || req.body.SmsSid;
     
+    if (messageId) {
+      const { rows: existing } = await client.query(
+        `SELECT 1 FROM messages WHERE message_id = $1 LIMIT 1`,
+        [messageId]
+      );
+
+      if (existing.length > 0) {
+        console.log('Duplicate message detected, skipping:', {
+          messageId,
+          from: req.body.From,
+          body: req.body.Body
+        });
+        return res.send(twiml.toString()); // Empty response
+      }
+    } else {
+      console.warn('Missing message ID in request:', req.body);
+    }
+
+    // 3. FIND BUSINESS CONFIG
     let config;
     if (isSandbox) {
       // Sandbox-specific lookup
@@ -99,13 +119,20 @@ export default async (req, res) => {
     twiml.message(aiResponse);
     res.send(twiml.toString());
 
-    // 6. LOG MESSAGE
+    // 6. LOG MESSAGE (updated with message_id)
     await client.query(
       `INSERT INTO messages 
-       (user_number, business_number, message, response, is_sandbox)
-       VALUES ($1, $2, $3, $4, $5)`,
-      [req.body.From, req.body.To, req.body.Body, aiResponse, isSandbox]
+       (user_number, business_number, message, response, is_sandbox, message_id)
+       VALUES ($1, $2, $3, $4, $5, $6)`,
+      [req.body.From, req.body.To, req.body.Body, aiResponse, isSandbox, messageId]
     );
+
+    console.log('Message processed successfully:', {
+      messageId,
+      from: req.body.From,
+      to: req.body.To,
+      response: aiResponse
+    });
 
   } catch (error) {
     console.error("Error processing message:", {
