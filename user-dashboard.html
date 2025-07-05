@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your WhatsApp Bot Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            color: #333;
+            line-height: 1.6;
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header-image-placeholder {
+            background: linear-gradient(45deg, #4CAF50, #2196F3);
+            height: 200px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            color: white;
+            font-size: 1.5rem;
+            text-align: center;
+        }
+        
+        .setup-card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+            padding: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .business-info {
+            background-color: #f1f8ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #d1e7ff;
+        }
+        
+        .business-info p {
+            margin: 8px 0;
+            display: flex;
+        }
+        
+        .business-info strong {
+            min-width: 150px;
+            display: inline-block;
+        }
+        
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .metric-card {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .metric-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4CAF50;
+            margin: 5px 0;
+        }
+        
+        .unanswered-item {
+            background: #FFF3E0;
+            padding: 12px;
+            margin-bottom: 8px;
+            border-left: 3px solid #FFA000;
+            border-radius: 4px;
+        }
+        
+        /* Enhanced Button Styles */
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            background-color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+            color: #333;
+            text-decoration: none;
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+        }
+        
+        .action-btn .btn-icon {
+            width: 24px;
+            height: 24px;
+            margin-right: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .action-btn.primary {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .action-btn.secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        
+        /* Refresh Button Specific */
+        .refresh-btn {
+            display: flex;
+            align-items: center;
+            background: white;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 20px;
+            width: 100%;
+            max-width: 300px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 20px auto;
+        }
+        
+        .refresh-btn .btn-content {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            width: 100%;
+        }
+        
+        .refresh-btn .btn-icon {
+            width: 40px;
+            height: 40px;
+            background: #4CAF50;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        
+        .refresh-btn .btn-text {
+            text-align: left;
+            flex-grow: 1;
+        }
+        
+        .refresh-btn .btn-subtext {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 2px;
+        }
+        
+        .refresh-btn.loading .btn-icon {
+            animation: spin 1s linear infinite;
+        }
+        
+        .refresh-btn.success .btn-icon {
+            background: #4CAF50;
+        }
+        
+        .refresh-btn.error .btn-icon {
+            background: #f44336;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .error-message {
+            color: #dc3545;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .business-info p {
+                flex-direction: column;
+            }
+            
+            .business-info strong {
+                min-width: auto;
+                margin-bottom: 4px;
+            }
+            
+            .metric-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .action-btn {
+                width: 100%;
+                margin-right: 0;
+                margin-bottom: 10px;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-image-placeholder">
+            <div><i class="fas fa-chart-line"></i> Your WhatsApp Analytics Dashboard</div>
+        </div>
+        
+        <div class="setup-card">
+            <!-- Business Info Section -->
+            <div class="business-info" id="businessInfoDisplay">
+                <p><strong>Business Name:</strong> <span id="dashboard-business-name">Loading...</span></p>
+                <p><strong>WhatsApp Number:</strong> <span id="dashboard-whatsapp-number">Loading...</span></p>
+                <p><strong>Language:</strong> <span id="dashboard-language">Loading...</span></p>
+            </div>
+            
+            <!-- Analytics Dashboard -->
+            <h3><i class="fas fa-chart-pie"></i> Performance Overview</h3>
+            <div class="metric-grid" id="metricsGrid">
+                <!-- Filled by JavaScript -->
+            </div>
+            
+            <!-- Refresh Button -->
+            <button class="refresh-btn" id="refreshBtn">
+                <div class="btn-content">
+                    <div class="btn-icon">
+                        <i class="fas fa-sync-alt"></i>
+                    </div>
+                    <div class="btn-text">
+                        Refresh Data
+                        <div class="btn-subtext">Last updated: <span id="lastUpdated">just now</span></div>
+                    </div>
+                </div>
+            </button>
+            
+            <!-- Unanswered Queries -->
+            <h3><i class="fas fa-exclamation-circle"></i> Requires Attention</h3>
+            <div id="unansweredQueries">
+                <p>Loading recent queries...</p>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div style="margin-top: 30px; display: flex; flex-wrap: wrap;">
+                <a href="customize-qa-responses.html" class="action-btn secondary">
+                    <div class="btn-icon">
+                        <i class="fas fa-edit"></i>
+                    </div>
+                    Edit Responses
+                </a>
+                <a href="preview.html" class="action-btn primary">
+                    <div class="btn-icon">
+                        <i class="fas fa-eye"></i>
+                    </div>
+                    Test Bot
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const elements = {
+            businessName: document.getElementById('dashboard-business-name'),
+            whatsappNumber: document.getElementById('dashboard-whatsapp-number'),
+            language: document.getElementById('dashboard-language'),
+            metricsGrid: document.getElementById('metricsGrid'),
+            unansweredQueries: document.getElementById('unansweredQueries'),
+            refreshBtn: document.getElementById('refreshBtn'),
+            lastUpdated: document.getElementById('lastUpdated')
+        };
+
+        // Cache system (5-minute cache)
+        const cache = {
+            data: null,
+            timestamp: 0,
+            isValid: () => (Date.now() - cache.timestamp) < 300000 // 5 minutes
+        };
+
+        // Load business data and analytics
+        async function loadDashboard() {
+            try {
+                // 1. Load business info from localStorage
+                const businessInfo = JSON.parse(localStorage.getItem('businessInfo')) || {};
+                const whatsappNumber = businessInfo.whatsappNumber;
+                
+                if (!whatsappNumber) {
+                    throw new Error("No business info found. Please complete setup first.");
+                }
+                
+                // 2. Display basic info
+                elements.businessName.textContent = businessInfo.name || 'Your Business';
+                elements.whatsappNumber.textContent = `+91 ${whatsappNumber.slice(-10)}`;
+                elements.language.textContent = businessInfo.language || 'English';
+                
+                // 3. Fetch analytics data
+                const analytics = await fetchAnalyticsWithCache(whatsappNumber);
+                
+                // 4. Update last updated time
+                updateLastUpdatedTime();
+                
+                // 5. Render metrics
+                renderMetrics(analytics.summary);
+                
+                // 6. Render unanswered queries
+                renderUnansweredQueries(analytics.unanswered);
+                
+            } catch (error) {
+                console.error("Dashboard error:", error);
+                elements.metricsGrid.innerHTML = `
+                    <div class="error-message">
+                        <strong>Error:</strong> ${error.message}
+                        <button onclick="location.reload()" class="action-btn primary" style="margin-top:10px;">
+                            <div class="btn-icon">
+                                <i class="fas fa-redo"></i>
+                            </div>
+                            Retry
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        // Fetch analytics with caching
+        async function fetchAnalyticsWithCache(whatsappNumber) {
+            if (cache.isValid() && cache.data) {
+                console.log("Returning cached analytics data");
+                return cache.data;
+            }
+            
+            const response = await fetch(`/api/get-analytics?number=${encodeURIComponent(whatsappNumber)}`);
+            if (!response.ok) throw new Error("Failed to load analytics");
+            
+            cache.data = await response.json();
+            cache.timestamp = Date.now();
+            return cache.data;
+        }
+
+        // Update last updated time display
+        function updateLastUpdatedTime() {
+            const now = new Date();
+            elements.lastUpdated.textContent = now.toLocaleTimeString('en-IN', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: true
+            });
+        }
+
+        // Handle refresh button click
+        async function handleRefresh() {
+            const btn = elements.refreshBtn;
+            
+            try {
+                // Set loading state
+                btn.classList.add('loading');
+                btn.disabled = true;
+                
+                // Force fresh fetch
+                cache.timestamp = 0;
+                const businessInfo = JSON.parse(localStorage.getItem('businessInfo')) || {};
+                const analytics = await fetchAnalyticsWithCache(businessInfo.whatsappNumber);
+                
+                // Update UI
+                updateLastUpdatedTime();
+                renderMetrics(analytics.summary);
+                renderUnansweredQueries(analytics.unanswered);
+                
+                // Show success state
+                btn.classList.remove('loading');
+                btn.classList.add('success');
+                setTimeout(() => {
+                    btn.classList.remove('success');
+                    btn.disabled = false;
+                }, 2000);
+                
+            } catch (error) {
+                console.error("Refresh failed:", error);
+                btn.classList.remove('loading');
+                btn.classList.add('error');
+                setTimeout(() => {
+                    btn.classList.remove('error');
+                    btn.disabled = false;
+                }, 2000);
+            }
+        }
+
+        // Render metrics cards
+        function renderMetrics(metrics) {
+            elements.metricsGrid.innerHTML = `
+                <div class="metric-card">
+                    <i class="fas fa-comments"></i>
+                    <div class="metric-value">${metrics.total_chats || 0}</div>
+                    <div>Total Chats</div>
+                </div>
+                <div class="metric-card">
+                    <i class="fas fa-check-circle"></i>
+                    <div class="metric-value">${metrics.response_rate || 0}%</div>
+                    <div>Response Rate</div>
+                </div>
+                <div class="metric-card">
+                    <i class="fas fa-users"></i>
+                    <div class="metric-value">${metrics.unique_customers || 0}</div>
+                    <div>Unique Customers</div>
+                </div>
+            `;
+        }
+
+        // Render unanswered queries
+        function renderUnansweredQueries(queries) {
+            if (!queries || queries.length === 0) {
+                elements.unansweredQueries.innerHTML = `
+                    <div class="metric-card" style="text-align:center;">
+                        <i class="fas fa-check" style="color:#4CAF50;font-size:24px;"></i>
+                        <p>All queries answered!</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            elements.unansweredQueries.innerHTML = `
+                <p>${queries.length} unanswered queries in last 24 hours:</p>
+                ${queries.map(q => `
+                    <div class="unanswered-item">
+                        <p><strong>${q.time}:</strong> ${q.message}</p>
+                        <small>From: ${q.customer_number.slice(-6)}</small>
+                        <a href="https://wa.me/${q.customer_number.replace('+', '')}" 
+                           target="_blank" 
+                           class="action-btn primary" 
+                           style="display:inline-flex;margin-top:5px;padding:8px 12px;">
+                            <div class="btn-icon">
+                                <i class="fab fa-whatsapp"></i>
+                            </div>
+                            Reply Now
+                        </a>
+                    </div>
+                `).join('')}
+            `;
+        }
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', () => {
+            loadDashboard();
+            elements.refreshBtn.addEventListener('click', handleRefresh);
+        });
+    </script>
+</body>
+</html>
