@@ -7,101 +7,102 @@ const twilioClient = twilio(
   process.env.TWILIO_AUTH_TOKEN
 );
 
+// Singleton DB Pool (critical for serverless)
 const dbPool = new Pool({
-  connectionString: process.env.DATABASE_URL
+  connectionString: process.env.DATABASE_URL,
+  max: 5,                  // Optimized for Vercel
+  idleTimeoutMillis: 10000, // Close idle connections after 10s
+  allowExitOnIdle: true     // Required for serverless environments
+});
+
+// Debug connection pooling
+let activeClients = 0;
+dbPool.on('connect', () => {
+  activeClients++;
+  console.log(`[DB] New connection. Active: ${activeClients}`);
+});
+dbPool.on('remove', () => {
+  activeClients--;
+  console.log(`[DB] Connection released. Active: ${activeClients}`);
 });
 
 async function handleMessage(req, res) {
-  console.log('\n=== NEW MESSAGE RECEIVED ===');
-  console.log('Request body:', JSON.stringify(req.body, null, 2));
+  console.log('\n=== INCOMING MESSAGE ===');
+  console.log('From:', req.body.From);
+  console.log('Body:', req.body.Body);
 
-  // Immediate response
+  // Immediate Twilio response
   const twiml = new twilio.twiml.MessagingResponse();
   twiml.message("We're processing your request...");
   res.setHeader('Content-Type', 'text/xml');
   res.send(twiml.toString());
 
+  let client;
   try {
-    const { Body, From, To } = req.body;
-    const userMessage = Body || '';
-    const fromNumber = From;
-    const toNumber = To;
+    // 1. Get database client from pool
+    client = await dbPool.connect();
+    console.log('[DB] Client acquired from pool');
 
-    console.log('\n[1] Basic message info extracted');
+    // 2. Query business config (with error handling)
+    const { rows } = await client.query(`
+      SELECT * FROM business_configs 
+      WHERE $1 = ANY(linked_numbers) 
+      LIMIT 1
+    `, [req.body.To.replace('whatsapp:', '')]);
 
-    // 1. Check if this is a sandbox join message
-    if (toNumber.includes('14155238886') && userMessage.toLowerCase().startsWith('join')) {
-      console.log('[2] Detected sandbox join message');
-      await sendMessage(fromNumber, toNumber, "🚀 You're connected! Ask me anything.");
-      return;
-    }
+    const config = rows[0] || {
+      business_name: 'Default Business',
+      language: 'English',
+      qa_pairs: {}
+    };
+    console.log('[DB] Config loaded:', config.business_name);
 
-    console.log('[3] Not a sandbox join message, proceeding normally');
+    // 3. Generate response
+    const response = generateResponse(req.body.Body, config);
+    console.log('[AI] Generated response:', response);
 
-    // 2. Get business config
-    let config;
-    try {
-      const { rows } = await dbPool.query(
-        `SELECT * FROM business_configs 
-         WHERE $1 = ANY(linked_numbers) 
-         LIMIT 1`,
-        [toNumber.replace('whatsapp:', '')]
-      );
-      config = rows[0] || {
-        business_name: 'Test Business',
-        language: 'English',
-        qa_pairs: {}
-      };
-      console.log('[4] Business config loaded:', config);
-    } catch (dbError) {
-      console.error('[4] Database error:', dbError);
-      await sendMessage(fromNumber, toNumber, "⚠️ Configuration error. Please try again later.");
-      return;
-    }
+    // 4. Send reply
+    await twilioClient.messages.create({
+      body: response,
+      from: req.body.To,
+      to: req.body.From
+    });
+    console.log('[Twilio] Response sent');
 
-    // 3. Generate response (simplified)
-    let response;
-    if (userMessage.toLowerCase().includes('hello')) {
-      response = `Hello! Thanks for contacting ${config.business_name}.`;
-    } else if (userMessage.toLowerCase().includes('hours')) {
-      response = "We're open Monday to Friday, 9AM to 5PM.";
-    } else {
-      response = "Thanks for your message! We'll get back to you soon.";
-    }
-
-    console.log('[5] Generated response:', response);
-
-    // 4. Send response
-    await sendMessage(fromNumber, toNumber, response);
-    console.log('[6] Response sent successfully');
-
-    // 5. Store in database (non-blocking)
-    dbPool.query(
-      `INSERT INTO message_logs (business_number, customer_number, message, response) 
-       VALUES ($1, $2, $3, $4)`,
-      [toNumber, fromNumber, userMessage, response]
-    ).catch(e => console.error('[7] Database save error:', e));
+    // 5. Log to database (non-blocking)
+    await client.query(`
+      INSERT INTO message_logs 
+      (business_number, customer_number, message, response) 
+      VALUES ($1, $2, $3, $4)
+    `, [req.body.To, req.body.From, req.body.Body, response]);
 
   } catch (error) {
-    console.error('[ERROR] Main handler error:', error);
-    await sendMessage(req.body.From, req.body.To, 
-      "⚠️ We encountered an error. Our team has been notified.");
+    console.error('[ERROR]', error);
+    // Fallback response
+    await twilioClient.messages.create({
+      body: "We're experiencing high demand. Please try again later.",
+      from: req.body.To,
+      to: req.body.From
+    });
+  } finally {
+    // 6. Always release client
+    if (client) {
+      client.release();
+      console.log('[DB] Client released');
+    }
   }
 }
 
-async function sendMessage(to, from, body) {
-  console.log(`Attempting to send to ${to}:`, body);
-  try {
-    await twilioClient.messages.create({
-      body: body,
-      from: from,
-      to: to
-    });
-    console.log('Message sent successfully');
-  } catch (err) {
-    console.error('Twilio send error:', err);
-    throw err;
+// Simplified response generator
+function generateResponse(message, config) {
+  const lowerMsg = message.toLowerCase();
+  if (lowerMsg.includes('hello') || lowerMsg.includes('hi')) {
+    return `Hello! Thanks for contacting ${config.business_name}.`;
   }
+  if (lowerMsg.includes('hour')) {
+    return "We're open Mon-Fri, 9AM-5PM.";
+  }
+  return config.qa_pairs[message] || "We'll get back to you soon!";
 }
 
 module.exports = handleMessage;
