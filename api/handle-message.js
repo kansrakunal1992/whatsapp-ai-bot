@@ -2,19 +2,12 @@ const { Pool } = require('@neondatabase/serverless');
 const twilio = require('twilio');
 
 // Initialize Twilio with error handling
-let twilioClient;
-try {
-  twilioClient = twilio(
-    process.env.TWILIO_ACCOUNT_SID,
-    process.env.TWILIO_AUTH_TOKEN
-  );
-  console.log('Twilio initialized successfully');
-} catch (twilioError) {
-  console.error('Twilio init failed:', twilioError);
-  process.exit(1);
-}
+const twilioClient = twilio(
+  process.env.TWILIO_ACCOUNT_SID,
+  process.env.TWILIO_AUTH_TOKEN
+);
 
-// Database pool with enhanced logging
+// Database pool configuration for Vercel
 const dbPool = new Pool({
   connectionString: process.env.DATABASE_URL,
   max: 3,
@@ -22,129 +15,84 @@ const dbPool = new Pool({
   allowExitOnIdle: true
 });
 
-// Pool event listeners for debugging
+// Debug connection pool events
 dbPool.on('connect', () => console.log('[DB] New connection'));
 dbPool.on('acquire', () => console.log('[DB] Client acquired'));
-dbPool.on('remove', () => console.log('[DB] Client removed'));
+dbPool.on('remove', () => console.log('[DB] Client released'));
 
 async function handleMessage(req, res) {
-  console.log('\n=== NEW REQUEST ===');
-  console.log('Incoming message:', {
-    from: req.body.From,
-    to: req.body.To,
-    body: req.body.Body
-  });
+  console.log('\n=== INCOMING MESSAGE ===');
+  console.log('From:', req.body.From);
+  console.log('To:', req.body.To);
+  console.log('Body:', req.body.Body);
 
-  // Phase 1: Immediate Twilio response
+  // 1. Immediate response (avoid Twilio timeout)
   const twiml = new twilio.twiml.MessagingResponse();
   twiml.message("We're processing your request...");
-  try {
-    res.setHeader('Content-Type', 'text/xml');
-    res.send(twiml.toString());
-    console.log('[1] Sent immediate response');
-  } catch (resError) {
-    console.error('Failed to send initial response:', resError);
-    return;
-  }
+  res.setHeader('Content-Type', 'text/xml');
+  res.send(twiml.toString());
 
-  // Phase 2: Database operations
   let client;
   try {
-    console.log('[2] Acquiring DB client...');
+    // 2. Get database connection
     client = await dbPool.connect();
-    console.log('[3] DB client acquired');
+    console.log('[DB] Connection established');
 
-    // Verify table exists
-    const testQuery = await client.query(`
-      SELECT EXISTS (
-        SELECT FROM information_schema.tables 
-        WHERE table_name = 'business_configs'
-      )
-    `);
-    console.log('[4] Table exists:', testQuery.rows[0].exists);
+    // 3. Find business config (supports both sandbox and production)
+    const twilioNumber = req.body.To.replace('whatsapp:', '');
+    const { rows } = await client.query(`
+      SELECT * FROM business_configs 
+      WHERE $1 = ANY(linked_numbers) OR whatsapp_number = $1
+      LIMIT 1
+    `, [twilioNumber]);
 
-    if (!testQuery.rows[0].exists) {
-      throw new Error('business_configs table missing');
+    if (!rows.length) {
+      throw new Error(`No config found for number: ${twilioNumber}`);
     }
 
-    // Main query with parameterized input
-    const query = {
-      text: `
-        SELECT business_name, language, qa_pairs 
-        FROM business_configs 
-        WHERE $1 = ANY(linked_numbers)
-        LIMIT 1
-      `,
-      values: [req.body.To.replace('whatsapp:', '')]
-    };
-    console.log('[5] Executing query:', query);
+    const config = rows[0];
+    console.log('[CONFIG] Loaded:', config.business_name);
 
-    const { rows } = await client.query(query);
-    console.log('[6] Query results:', rows.length ? 'Found' : 'Empty');
-
-    // Fallback config if no DB results
-    const config = rows[0] || {
-      business_name: 'Default Business',
-      language: 'English',
-      qa_pairs: {
-        "hello": "Hello from fallback config!",
-        "hi": "Hi there! How can we help?"
-      }
-    };
-    console.log('[7] Using config:', config.business_name);
-
-    // Phase 3: Response generation
+    // 4. Generate response
     const response = generateResponse(req.body.Body, config);
-    console.log('[8] Generated response:', response);
+    console.log('[RESPONSE]', response);
 
-    // Phase 4: Twilio reply
-    console.log('[9] Sending via Twilio...');
+    // 5. Send reply via Twilio
     await twilioClient.messages.create({
       body: response,
       from: req.body.To,
       to: req.body.From
     });
-    console.log('[10] Twilio reply sent');
 
-    // Phase 5: Log to database (non-blocking)
-    await client.query(
-      `INSERT INTO message_logs 
-       (business_number, customer_number, message, response) 
-       VALUES ($1, $2, $3, $4)`,
-      [req.body.To, req.body.From, req.body.Body, response]
-    );
-    console.log('[11] Logged to database');
+    // 6. Log conversation (non-blocking)
+    await client.query(`
+      INSERT INTO message_logs 
+      (business_number, customer_number, message, response) 
+      VALUES ($1, $2, $3, $4)
+    `, [twilioNumber, req.body.From.replace('whatsapp:', ''), req.body.Body, response]);
 
   } catch (error) {
-    console.error('[ERROR] Processing failed:', {
-      message: error.message,
-      stack: error.stack,
-      twilioSid: req.body.MessageSid
-    });
-
-    // Emergency fallback reply
+    console.error('[ERROR]', error);
+    
+    // Emergency fallback
     try {
       await twilioClient.messages.create({
-        body: "We're experiencing technical difficulties. Please try again later.",
+        body: "We're upgrading our systems. Please try again in 5 minutes.",
         from: req.body.To,
         to: req.body.From
       });
-      console.log('[FALLBACK] Sent error notification');
     } catch (twilioError) {
-      console.error('[CRITICAL] Twilio fallback failed:', twilioError);
+      console.error('[CRITICAL] Fallback failed:', twilioError);
     }
   } finally {
-    if (client) {
-      client.release();
-      console.log('[12] DB client released');
-    }
+    if (client) client.release();
   }
 }
 
 function generateResponse(message, config) {
-  const lowerMsg = message.toLowerCase();
+  const lowerMsg = message.toLowerCase().trim();
   
-  // 1. Check exact matches in qa_pairs
+  // 1. Check exact matches
   if (config.qa_pairs[lowerMsg]) {
     return config.qa_pairs[lowerMsg];
   }
@@ -156,12 +104,12 @@ function generateResponse(message, config) {
     }
   }
 
-  // 3. Hardcoded fallbacks
-  if (lowerMsg.includes('hello') || lowerMsg.includes('hi')) {
-    return `Hello from ${config.business_name}! How can we help?`;
+  // 3. Default responses
+  if (/hello|hi|hey/.test(lowerMsg)) {
+    return `Hello! Thanks for contacting ${config.business_name}.`;
   }
-  if (lowerMsg.includes('hour')) {
-    return "Our hours are Mon-Fri 9AM-5PM";
+  if (/hour|time|open/.test(lowerMsg)) {
+    return "Our hours are 9AM-5PM Monday to Friday.";
   }
 
   // 4. Ultimate fallback
