@@ -38,10 +38,10 @@ async function handleMessage(req, res) {
   res.send(initialTwiml.toString());
 
   // Check for duplicates
-  if (pendingMessages.has(messageId)) {
-    console.log(`Duplicate message ${messageId} detected`);
-    return;
-  }
+  //if (pendingMessages.has(messageId)) {
+  //  console.log(`Duplicate message ${messageId} detected`);
+  //  return;
+  //}
   pendingMessages.add(messageId);
 
   try {
