@@ -1,0 +1,14 @@
+{
+  "name": "whatsapp-ai-bot",
+  "version": "1.0.0",
+  "dependencies": {
+    "twilio": "^4.0.0",
+    "micro": "^9.3.4",
+    "querystring": "^0.2.1",
+    "@neondatabase/serverless": "^1.0.0",
+    "pg": "^8.11.3"
+  },
+  "engines": {
+    "node": ">=16.x"
+  }
+}
