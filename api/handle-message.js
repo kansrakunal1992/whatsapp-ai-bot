@@ -1,7 +1,5 @@
-// handle-message.js - CommonJS version
 const { Pool } = require('@neondatabase/serverless');
 const twilio = require('twilio');
-const { getAIResponse } = require('./utils/ai-helper.js');
 
 // Initialize Twilio
 const twilioClient = twilio(
@@ -9,141 +7,101 @@ const twilioClient = twilio(
   process.env.TWILIO_AUTH_TOKEN
 );
 
-// Database pool configuration
 const dbPool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  idleTimeoutMillis: 30000,
-  max: 5,
-  allowExitOnIdle: true
+  connectionString: process.env.DATABASE_URL
 });
 
-// Sandbox numbers configuration
-const SANDBOX_NUMBERS = new Set([
-  process.env.TWILIO_PHONE_NUMBER,
-  'whatsapp:+14155238886', // Default Twilio sandbox
-  ...(process.env.TWILIO_SANDBOX_NUMBERS ? process.env.TWILIO_SANDBOX_NUMBERS.split(',') : [])
-].map(num => num.trim()).filter(num => num));
-
-// Track pending messages
-const pendingMessages = new Set();
-
 async function handleMessage(req, res) {
-  // Generate unique message ID
-  const messageId = req.body.MessageSid || `${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
-  
-  // Immediate response to Twilio
-  const initialTwiml = new twilio.twiml.MessagingResponse();
-  initialTwiml.message("We're processing your request...");
-  res.setHeader('Content-Type', 'text/xml');
-  res.send(initialTwiml.toString());
+  console.log('\n=== NEW MESSAGE RECEIVED ===');
+  console.log('Request body:', JSON.stringify(req.body, null, 2));
 
-  // Check for duplicates
-  //if (pendingMessages.has(messageId)) {
-  //  console.log(`Duplicate message ${messageId} detected`);
-  //  return;
-  //}
-  pendingMessages.add(messageId);
+  // Immediate response
+  const twiml = new twilio.twiml.MessagingResponse();
+  twiml.message("We're processing your request...");
+  res.setHeader('Content-Type', 'text/xml');
+  res.send(twiml.toString());
 
   try {
     const { Body, From, To } = req.body;
-    const userMessage = String(Body || '').slice(0, 1000);
-    const fromNumber = String(From || '').slice(0, 50);
-    const toNumber = String(To || '').slice(0, 50);
-    const isSandbox = SANDBOX_NUMBERS.has(toNumber.replace('whatsapp:', ''));
+    const userMessage = Body || '';
+    const fromNumber = From;
+    const toNumber = To;
 
-    // Handle sandbox activation
-    if (isSandbox && userMessage.toLowerCase().startsWith('join')) {
-      await sendWithRetry(fromNumber, toNumber, "🚀 You're connected! Ask us anything anytime.");
+    console.log('\n[1] Basic message info extracted');
+
+    // 1. Check if this is a sandbox join message
+    if (toNumber.includes('14155238886') && userMessage.toLowerCase().startsWith('join')) {
+      console.log('[2] Detected sandbox join message');
+      await sendMessage(fromNumber, toNumber, "🚀 You're connected! Ask me anything.");
       return;
     }
 
-    // Get business config with timeout
-    const config = await Promise.race([
-      getBusinessConfig(toNumber),
-      new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Business config timeout')), 5000))
-    ]);
+    console.log('[3] Not a sandbox join message, proceeding normally');
 
-    // Generate AI response with timeout
-    const aiResponse = await Promise.race([
-      getAIResponse(userMessage, {
-        businessName: config.business_name,
-        knownAnswers: config.qa_pairs || {},
-        apiKey: process.env.DEEPSEEK_API_KEY
-      }, config.language || 'English'),
-      new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('AI response timeout')), 10000))
-    ]);
+    // 2. Get business config
+    let config;
+    try {
+      const { rows } = await dbPool.query(
+        `SELECT * FROM business_configs 
+         WHERE $1 = ANY(linked_numbers) 
+         LIMIT 1`,
+        [toNumber.replace('whatsapp:', '')]
+      );
+      config = rows[0] || {
+        business_name: 'Test Business',
+        language: 'English',
+        qa_pairs: {}
+      };
+      console.log('[4] Business config loaded:', config);
+    } catch (dbError) {
+      console.error('[4] Database error:', dbError);
+      await sendMessage(fromNumber, toNumber, "⚠️ Configuration error. Please try again later.");
+      return;
+    }
 
-    // Store message (fire-and-forget)
+    // 3. Generate response (simplified)
+    let response;
+    if (userMessage.toLowerCase().includes('hello')) {
+      response = `Hello! Thanks for contacting ${config.business_name}.`;
+    } else if (userMessage.toLowerCase().includes('hours')) {
+      response = "We're open Monday to Friday, 9AM to 5PM.";
+    } else {
+      response = "Thanks for your message! We'll get back to you soon.";
+    }
+
+    console.log('[5] Generated response:', response);
+
+    // 4. Send response
+    await sendMessage(fromNumber, toNumber, response);
+    console.log('[6] Response sent successfully');
+
+    // 5. Store in database (non-blocking)
     dbPool.query(
-      `INSERT INTO message_logs (business_number, customer_number, message, response) VALUES ($1, $2, $3, $4)`,
-      [toNumber, fromNumber, userMessage, aiResponse]
-    ).catch(console.error);
-
-    // Send final response
-    await sendWithRetry(fromNumber, toNumber, aiResponse);
+      `INSERT INTO message_logs (business_number, customer_number, message, response) 
+       VALUES ($1, $2, $3, $4)`,
+      [toNumber, fromNumber, userMessage, response]
+    ).catch(e => console.error('[7] Database save error:', e));
 
   } catch (error) {
-    console.error("Processing failed:", error);
-    
-    // Fallback message
-    await sendWithRetry(
-      req.body.From, 
-      req.body.To,
-      "We're experiencing high demand. Please try again later."
-    );
-    
-    // Critical error notification
-    if (process.env.TWILIO_PHONE_NUMBER) {
-      await twilioClient.messages.create({
-        body: `CRITICAL: ${error.message.slice(0, 100)}`,
-        from: process.env.TWILIO_PHONE_NUMBER,
-        to: process.env.TWILIO_PHONE_NUMBER
-      }).catch(e => console.error("Failed to send alert:", e));
-    }
-  } finally {
-    pendingMessages.delete(messageId);
+    console.error('[ERROR] Main handler error:', error);
+    await sendMessage(req.body.From, req.body.To, 
+      "⚠️ We encountered an error. Our team has been notified.");
   }
 }
 
-// Enhanced send function with retry logic
-async function sendWithRetry(to, from, body, attempt = 1) {
+async function sendMessage(to, from, body) {
+  console.log(`Attempting to send to ${to}:`, body);
   try {
     await twilioClient.messages.create({
-      body: String(body).slice(0, 1600),
+      body: body,
       from: from,
       to: to
     });
-  } catch (error) {
-    if (attempt >= 3) throw error;
-    await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
-    return sendWithRetry(to, from, body, attempt + 1);
+    console.log('Message sent successfully');
+  } catch (err) {
+    console.error('Twilio send error:', err);
+    throw err;
   }
-}
-
-// Business config with caching
-const configCache = new Map();
-async function getBusinessConfig(number) {
-  if (configCache.has(number)) {
-    return configCache.get(number);
-  }
-
-  const { rows } = await dbPool.query(`
-    SELECT * FROM business_configs 
-    WHERE $1 = ANY(linked_numbers) 
-    LIMIT 1
-  `, [number.replace('whatsapp:', '')]);
-
-  const config = rows[0] || {
-    business_name: 'Our Business',
-    language: 'English',
-    qa_pairs: {}
-  };
-
-  configCache.set(number, config);
-  setTimeout(() => configCache.delete(number), 300000); // 5 min cache
-  return config;
 }
 
 module.exports = handleMessage;
