@@ -1,0 +1,1727 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp AI Automation for Indian Businesses</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Hind:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #25D366; /* WhatsApp green */
+            --secondary: #075E54; /* Dark WhatsApp green */
+            --accent: #FF9F43; /* Saffron for Indian touch */
+            --light: #F5F5F5;
+            --dark: #333333;
+            --text: #2C3E50;
+            --india-saffron: #FF9933;
+            --india-green: #138808;
+            --india-blue: #000080;
+            --india-light: #E8F5E9;
+            --india-dark: #1A237E;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', 'Hind', sans-serif;
+            color: var(--text);
+            line-height: 1.6;
+            background-color: white;
+            overflow-x: hidden;
+        }
+        
+        /* Indian Flag Colors - Horizontal Bars */
+        .india-top-bar {
+            height: 4px;
+            background-color: var(--india-saffron);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .india-bottom-bar {
+            height: 4px;
+            background-color: var(--india-green);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-top: 4px;
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        /* Language Selector */
+        .language-selector {
+            position: relative;
+            display: inline-block;
+            margin-left: 1rem;
+        }
+        
+        .language-btn {
+            background: transparent;
+            border: none;
+            color: var(--dark);
+            font-family: inherit;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        
+        .language-btn i {
+            transition: transform 0.3s ease;
+        }
+        
+        .language-btn.active i {
+            transform: rotate(180deg);
+        }
+        
+        .language-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            padding: 0.5rem 0;
+            min-width: 150px;
+            z-index: 100;
+            display: none;
+        }
+        
+        .language-dropdown.show {
+            display: block;
+        }
+        
+        .language-option {
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .language-option:hover {
+            background-color: var(--light);
+        }
+        
+        /* Multilingual Badge */
+        .multilingual-badge {
+            display: inline-block;
+            background-color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 50px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin: 0.2rem;
+            font-size: 0.8rem;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+        
+        /* Header Styles */
+        header {
+            background-color: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo-icon {
+            color: var(--primary);
+            font-size: 2rem;
+        }
+        
+        .logo-text {
+            font-weight: 700;
+            font-size: 1.8rem;
+            background: linear-gradient(to right, var(--india-green), var(--india-saffron));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            position: relative;
+        }
+        
+        .logo-text:after {
+            content: 'भारत';
+            position: absolute;
+            bottom: -15px;
+            right: 0;
+            font-size: 0.8rem;
+            color: var(--india-blue);
+            font-weight: 700;
+        }
+        
+        nav {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        
+        nav a {
+            text-decoration: none;
+            color: var(--dark);
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+            font-size: 1.1rem;
+        }
+        
+        nav a:hover {
+            color: var(--india-saffron);
+        }
+        
+        nav a:after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 3px;
+            bottom: -5px;
+            left: 0;
+            background-color: var(--india-green);
+            transition: width 0.3s ease;
+        }
+        
+        nav a:hover:after {
+            width: 100%;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 0.8rem 1.8rem;
+            border-radius: 50px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+        }
+        
+        .btn-primary:hover {
+            background-color: #20ba5a;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4);
+        }
+        
+        .btn-secondary {
+            background-color: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+        
+        .btn-secondary:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-accent {
+            background-color: var(--accent);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 159, 67, 0.3);
+        }
+        
+        .btn-accent:hover {
+            background-color: #e68f3a;
+            transform: translateY(-2px);
+        }
+        
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, rgba(37, 211, 102, 0.1) 0%, rgba(7, 94, 84, 0.1) 100%);
+            padding: 5rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero:before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 80%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(37, 211, 102, 0.05) 0%, rgba(255, 255, 255, 0) 70%);
+            z-index: 0;
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            gap: 3rem;
+        }
+        
+        .hero-text {
+            flex: 1;
+        }
+        
+        .hero-image {
+            flex: 1;
+            position: relative;
+        }
+        
+        .hero-image img {
+            width: 100%;
+            max-width: 500px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            transform: perspective(1000px) rotateY(-10deg);
+            border: 10px solid white;
+        }
+        
+        .hero-image:after {
+            content: '';
+            position: absolute;
+            top: -20px;
+            left: -20px;
+            right: -20px;
+            bottom: -20px;
+            border: 2px dashed var(--primary);
+            border-radius: 30px;
+            z-index: -1;
+            opacity: 0.5;
+        }
+        
+        .hero h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+            color: var(--secondary);
+        }
+        
+        .hero h1 span {
+            color: var(--primary);
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            color: var(--text);
+            max-width: 90%;
+        }
+        
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            background-color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            margin-right: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .badge i {
+            margin-right: 0.5rem;
+            color: var(--primary);
+        }
+        
+        /* Language Showcase */
+        .language-showcase {
+            margin: 1rem 0;
+            display: flex;
+            flex-wrap: wrap;
+        }
+        
+        /* Features Section */
+        .features {
+            padding: 5rem 0;
+            background-color: white;
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .section-title h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--secondary);
+            margin-bottom: 1rem;
+        }
+        
+        .section-title p {
+            font-size: 1.2rem;
+            color: var(--text);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+        
+        .feature-card {
+            background-color: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0,0,0,0.05);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+        }
+        
+        .feature-card:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 0;
+            background: linear-gradient(to bottom, var(--primary), var(--secondary));
+            transition: height 0.3s ease;
+        }
+        
+        .feature-card:hover:before {
+            height: 100%;
+        }
+        
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+        }
+        
+        .feature-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--secondary);
+        }
+        
+        .feature-card p {
+            color: var(--text);
+            margin-bottom: 1.5rem;
+        }
+        
+        .feature-link {
+            display: inline-flex;
+            align-items: center;
+            color: var(--primary);
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .feature-link i {
+            margin-left: 0.5rem;
+            transition: transform 0.3s ease;
+        }
+        
+        .feature-link:hover {
+            color: var(--secondary);
+        }
+        
+        .feature-link:hover i {
+            transform: translateX(5px);
+        }
+        
+        /* How It Works Section */
+        .how-it-works {
+            padding: 5rem 0;
+            background-color: var(--light);
+            position: relative;
+        }
+        
+        .steps {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            margin-top: 3rem;
+            position: relative;
+        }
+        
+        .step {
+            display: flex;
+            gap: 2rem;
+            background-color: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .step-number {
+            flex-shrink: 0;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(to bottom right, var(--primary), var(--secondary));
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            box-shadow: 0 5px 15px rgba(37, 211, 102, 0.3);
+        }
+        
+        .step-content h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--secondary);
+        }
+        
+        .step-content p {
+            color: var(--text);
+        }
+        
+        .steps:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 30px;
+            height: 100%;
+            width: 4px;
+            background: linear-gradient(to bottom, var(--primary), var(--secondary));
+            z-index: 0;
+        }
+        
+        /* Feature Rows with Alternating Layout */
+        .feature-row {
+            display: flex;
+            align-items: center;
+            margin: 4rem 0;
+            gap: 3rem;
+        }
+        
+        .feature-row:nth-child(odd) {
+            flex-direction: row;
+        }
+        
+        .feature-row:nth-child(even) {
+            flex-direction: row-reverse;
+        }
+        
+        .feature-content {
+            flex: 1;
+        }
+        
+        .feature-image {
+            flex: 1;
+            text-align: center;
+        }
+        
+        .feature-image img {
+            max-width: 100%;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        /* Testimonials Section */
+        .testimonials {
+            padding: 5rem 0;
+            background-color: white;
+        }
+        
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+        
+        .testimonial-card {
+            background-color: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            border: 1px solid rgba(0,0,0,0.05);
+            position: relative;
+        }
+        
+        .testimonial-card:before {
+            content: '"';
+            position: absolute;
+            top: 10px;
+            left: 20px;
+            font-size: 5rem;
+            color: rgba(37, 211, 102, 0.1);
+            font-family: serif;
+            line-height: 1;
+        }
+        
+        .testimonial-content {
+            margin-bottom: 1.5rem;
+            position: relative;
+            z-index: 1;
+            font-style: italic;
+        }
+        
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .author-info h4 {
+            color: var(--secondary);
+            margin-bottom: 0.2rem;
+        }
+        
+        .author-info p {
+            color: var(--text);
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        .rating {
+            color: var(--accent);
+            margin-top: 0.3rem;
+        }
+        
+        /* Pricing Section */
+        .pricing {
+            padding: 5rem 0;
+            background-color: var(--light);
+        }
+        
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+        
+        .pricing-card {
+            background-color: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        .pricing-card.free {
+            border: 2px solid var(--india-saffron);
+        }
+        
+        .pricing-card.popular {
+            border: 2px solid var(--primary);
+            transform: scale(1.02);
+        }
+        
+        .free-badge {
+            position: absolute;
+            top: 15px;
+            right: -30px;
+            background-color: var(--india-saffron);
+            color: white;
+            padding: 0.3rem 3rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transform: rotate(45deg);
+        }
+        
+        .popular-badge {
+            position: absolute;
+            top: 15px;
+            right: -30px;
+            background-color: var(--primary);
+            color: white;
+            padding: 0.3rem 3rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transform: rotate(45deg);
+        }
+        
+        .pricing-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--secondary);
+        }
+        
+        .price {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+        }
+        
+        .price.free {
+            color: var(--india-saffron);
+        }
+        
+        .price span {
+            font-size: 1rem;
+            color: var(--text);
+            opacity: 0.7;
+        }
+        
+        .pricing-features {
+            margin-bottom: 2rem;
+            text-align: left;
+        }
+        
+        .pricing-features li {
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .pricing-features li i {
+            margin-right: 0.5rem;
+            color: var(--primary);
+        }
+        
+        .pricing-features li .free-icon {
+            color: var(--india-saffron);
+        }
+        
+        /* CTA Section */
+        .cta {
+            padding: 5rem 0;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cta:before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 200%;
+            background-image: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+        }
+        
+        .cta .container {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .cta h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .cta p {
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto 2rem;
+            opacity: 0.9;
+        }
+        
+        .cta-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        /* FAQ Section */
+        .faq {
+            padding: 5rem 0;
+            background-color: white;
+        }
+        
+        .faq-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .faq-item {
+            margin-bottom: 1rem;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        .faq-question {
+            background-color: white;
+            color: var(--secondary);
+            padding: 1.5rem;
+            cursor: pointer;
+            position: relative;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .faq-question:hover {
+            background-color: var(--light);
+        }
+        
+        .faq-question i {
+            transition: transform 0.3s ease;
+        }
+        
+        .faq-question.active {
+            background-color: var(--light);
+        }
+        
+        .faq-question.active i {
+            transform: rotate(180deg);
+        }
+        
+        .faq-answer {
+            background-color: white;
+            padding: 0 1.5rem;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, padding 0.3s ease;
+        }
+        
+        .faq-answer.show {
+            padding: 0 1.5rem 1.5rem;
+            max-height: 500px;
+        }
+        
+        .faq-answer p {
+            margin-bottom: 1rem;
+        }
+        
+        .faq-answer p:last-child {
+            margin-bottom: 0;
+        }
+        
+        /* Footer */
+        .footer-top {
+            background-color: var(--secondary);
+            color: white;
+            padding: 4rem 0;
+        }
+        
+        .footer-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 3rem;
+        }
+        
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 1.5rem;
+        }
+        
+        .footer-logo-icon {
+            color: white;
+            font-size: 1.8rem;
+        }
+        
+        .footer-logo-text {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: white;
+        }
+        
+        .footer-about p {
+            opacity: 0.8;
+            margin-bottom: 1.5rem;
+        }
+        
+        .social-links {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .social-links a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(255,255,255,0.1);
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .social-links a:hover {
+            background-color: var(--primary);
+            transform: translateY(-3px);
+        }
+        
+        .footer-column h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+            padding-bottom: 0.8rem;
+        }
+        
+        .footer-column h3:after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 40px;
+            height: 3px;
+            background-color: var(--primary);
+        }
+        
+        .footer-links li {
+            margin-bottom: 0.8rem;
+        }
+        
+        .footer-links a {
+            color: white;
+            opacity: 0.8;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .footer-links a:hover {
+            opacity: 1;
+            color: var(--primary);
+            padding-left: 5px;
+        }
+        
+        .footer-contact p {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.8rem;
+            margin-bottom: 1rem;
+            opacity: 0.8;
+        }
+        
+        .footer-contact i {
+            margin-top: 3px;
+        }
+        
+        .footer-bottom {
+            background-color: var(--dark);
+            color: white;
+            text-align: center;
+            padding: 1.5rem 0;
+            font-size: 0.9rem;
+        }
+        
+        .footer-bottom p {
+            opacity: 0.8;
+        }
+        
+        .india-flag {
+            height: 40px;
+            margin-top: 1rem;
+            animation: wave 3s infinite;
+        }
+        
+        @keyframes wave {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(2deg); }
+            75% { transform: rotate(-2deg); }
+        }
+        
+        /* WhatsApp Float Button */
+        .whatsapp-float {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background-color: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            box-shadow: 0 5px 20px rgba(37, 211, 102, 0.4);
+            z-index: 99;
+            transition: all 0.3s ease;
+            animation: pulse 2s infinite;
+        }
+        
+        .whatsapp-float:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(37, 211, 102, 0.6);
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(37, 211, 102, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); }
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .hero-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .hero p {
+                max-width: 100%;
+            }
+            
+            .hero-buttons {
+                justify-content: center;
+            }
+            
+            .hero-image img {
+                max-width: 400px;
+            }
+            
+            .feature-row {
+                flex-direction: column !important;
+                gap: 2rem;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .header-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            nav {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+            
+            .section-title h2 {
+                font-size: 2rem;
+            }
+            
+            .steps:before {
+                left: 30px;
+            }
+            
+            .step {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .cta-buttons .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .pricing-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .language-selector {
+                margin: 0.5rem 0;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .hero {
+                padding: 3rem 0;
+            }
+            
+            .hero h1 {
+                font-size: 1.8rem;
+            }
+            
+            .hero p {
+                font-size: 1rem;
+            }
+            
+            .hero-buttons {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .hero-buttons .btn {
+                width: 100%;
+            }
+            
+            .section-title h2 {
+                font-size: 1.8rem;
+            }
+            
+            .steps:before {
+                left: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Indian Flag Top Bar -->
+    <div class="india-top-bar"></div>
+    
+    <!-- WhatsApp Float Button -->
+    <a href="https://wa.me/919876543210" class="whatsapp-float" target="_blank">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+    
+    <!-- Header -->
+    <header>
+        <div class="container header-container">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fab fa-whatsapp"></i>
+                </div>
+                <div class="logo-text">WhatsApp<span>AI</span></div>
+            </div>
+            <nav>
+                <a href="#features">Features</a>
+                <a href="#how-it-works">How It Works</a>
+                <a href="#pricing">Pricing</a>
+                <a href="#testimonials">Testimonials</a>
+                <a href="#faq">FAQ</a>
+                <div class="language-selector">
+                    <button class="language-btn">
+                        English <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="language-dropdown">
+                        <div class="language-option" data-lang="en">English</div>
+                        <div class="language-option" data-lang="hi">हिंदी</div>
+                        <div class="language-option" data-lang="pa">ਪੰਜਾਬੀ</div>
+                        <div class="language-option" data-lang="bn">বাংলা</div>
+                        <div class="language-option" data-lang="gu">ગુજરાતી</div>
+                        <div class="language-option" data-lang="mr">मराठी</div>
+                        <div class="language-option" data-lang="ta">தமிழ்</div>
+                        <div class="language-option" data-lang="te">తెలుగు</div>
+                        <div class="language-option" data-lang="kn">ಕನ್ನಡ</div>
+                        <div class="language-option" data-lang="ml">മലയാളം</div>
+                        <div class="language-option" data-lang="or">ଓଡ଼ିଆ</div>
+                    </div>
+                </div>
+                <a href="#pricing" class="btn btn-primary">Get Started</a>
+            </nav>
+        </div>
+    </header>
+    
+    <!-- Indian Flag Bottom Bar -->
+    <div class="india-bottom-bar"></div>
+    
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1>Automate Your WhatsApp Business with <span>AI Power</span></h1>
+                    <p>Transform your customer interactions with our AI-powered WhatsApp automation solution designed specifically for Indian businesses. Save time, increase sales, and provide 24/7 support.</p>
+                    
+                    <div class="badges">
+                        <span class="badge"><i class="fas fa-check-circle"></i> No Coding Required</span>
+                        <span class="badge"><i class="fas fa-rupee-sign"></i> Affordable Pricing</span>
+                        <span class="badge"><i class="fas fa-language"></i> Multilingual Support</span>
+                    </div>
+                    
+                    <div class="language-showcase">
+                        <span class="multilingual-badge">हिंदी</span>
+                        <span class="multilingual-badge">ਪੰਜਾਬੀ</span>
+                        <span class="multilingual-badge">বাংলা</span>
+                        <span class="multilingual-badge">ગુજરાતી</span>
+                        <span class="multilingual-badge">தமிழ்</span>
+                        <span class="multilingual-badge">తెలుగు</span>
+                    </div>
+                    
+                    <div class="hero-buttons">
+                        <a href="#pricing" class="btn btn-primary">View Plans</a>
+                        <a href="#how-it-works" class="btn btn-secondary">How It Works</a>
+                    </div>
+                </div>
+                <div class="hero-image">
+                    <img src="images/hero-bg.jpg" alt="WhatsApp AI Automation Demo">
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="container">
+            <div class="section-title">
+                <h2>Powerful Features for Your Business</h2>
+                <p>Our WhatsApp AI automation comes packed with everything you need to streamline customer communication and grow your business</p>
+            </div>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <h3>Smart Auto-Reply</h3>
+                    <p>Automatically respond to common customer queries instantly with our AI-powered responses that learn from your business.</p>
+                    <a href="#how-it-works" class="feature-link">Learn more <i class="fas fa-arrow-right"></i></a>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <h3>Multilingual Support</h3>
+                    <p>Communicate with customers in Hindi, English, and other regional languages effortlessly.</p>
+                    <a href="#faq" class="feature-link">Learn more <i class="fas fa-arrow-right"></i></a>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3>Lead Generation</h3>
+                    <p>Capture leads automatically from WhatsApp conversations and export them to your CRM.</p>
+                    <a href="#how-it-works" class="feature-link">Learn more <i class="fas fa-arrow-right"></i></a>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <h3>Order Management</h3>
+                    <p>Accept orders directly through WhatsApp with automated order confirmation and tracking.</p>
+                    <a href="#how-it-works" class="feature-link">Learn more <i class="fas fa-arrow-right"></i></a>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-database"></i>
+                    </div>
+                    <h3>Customer Database</h3>
+                    <p>Automatically save customer information and chat history for future reference.</p>
+                    <a href="#how-it-works" class="feature-link">Learn more <i class="fas fa-arrow-right"></i></a>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-pie"></i>
+                    </div>
+                    <h3>Analytics Dashboard</h3>
+                    <p>Track response times, customer satisfaction, and conversion rates with detailed analytics.</p>
+                    <a href="#how-it-works" class="feature-link">Learn more <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- How It Works Section -->
+    <section class="how-it-works" id="how-it-works">
+        <div class="container">
+            <div class="section-title">
+                <h2>How It Works</h2>
+                <p>Get started with WhatsApp AI automation in just 3 simple steps</p>
+            </div>
+            
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h3>Connect Your WhatsApp</h3>
+                        <p>Link your WhatsApp Business account with our platform in just a few clicks. No technical knowledge required.</p>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h3>Train Your AI</h3>
+                        <p>Provide information about your products/services. Our AI will learn to answer customer queries automatically.</p>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h3>Go Live & Grow</h3>
+                        <p>Start automating your WhatsApp conversations and watch your customer satisfaction and sales grow.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Feature Rows with Alternating Layout -->
+            <div class="feature-row">
+                <div class="feature-content">
+                    <h3>AI Auto-Reply</h3>
+                    <p>Streamline your customer communication with automated replies tailored to your brand's voice. Our AI learns from your conversations to provide increasingly accurate responses.</p>
+                    <a href="#pricing" class="btn btn-primary">Get Started</a>
+                </div>
+                <div class="feature-image">
+                    <img src="images/auto-reply-feature.jpg" alt="AI Auto-Reply Feature Screenshot">
+                </div>
+            </div>
+            
+            <div class="feature-row">
+                <div class="feature-content">
+                    <h3>Smart Responses</h3>
+                    <p>Our AI understands context and provides personalized responses that enhance customer satisfaction. It can handle complex queries and maintain natural conversations.</p>
+                    <a href="#pricing" class="btn btn-primary">Learn More</a>
+                </div>
+                <div class="feature-image">
+                    <img src="images/smart-responses.jpg" alt="Smart Responses Example">
+                </div>
+            </div>
+            
+            <div class="feature-row">
+                <div class="feature-content">
+                    <h3>Lead Capture</h3>
+                    <p>Effortlessly gather potential customer information and drive conversions directly from WhatsApp. Our system automatically extracts and organizes lead data for you.</p>
+                    <a href="#pricing" class="btn btn-primary">Get Started</a>
+                </div>
+                <div class="feature-image">
+                    <img src="images/lead-capture.jpg" alt="Lead Capture Interface">
+                </div>
+            </div>
+            
+            <div class="feature-row">
+                <div class="feature-content">
+                    <h3>Analytics Dashboard</h3>
+                    <p>Gain insights into customer interactions and improve your service strategies with our analytics tools. Track response times, conversion rates, and customer satisfaction.</p>
+                    <a href="#pricing" class="btn btn-primary">View Analytics</a>
+                </div>
+                <div class="feature-image">
+                    <img src="images/analytics-dashboard.jpg" alt="Analytics Dashboard Screenshot">
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Testimonials Section -->
+    <section class="testimonials" id="testimonials">
+        <div class="container">
+            <div class="section-title">
+                <h2>What Our Customers Say</h2>
+                <p>Trusted by small businesses across India</p>
+            </div>
+            
+            <div class="testimonials-grid">
+                <div class="testimonial-card">
+                    <div class="testimonial-content">
+                        "This WhatsApp automation has transformed my small kirana store. I can now handle 10x more customer queries without hiring additional staff. The Hindi support is excellent!"
+                    </div>
+                    <div class="testimonial-author">
+                        <div class="author-info">
+                            <h4>Rajesh Kumar</h4>
+                            <p>Kirana Store Owner, Delhi</p>
+                            <div class="rating">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="testimonial-card">
+                    <div class="testimonial-content">
+                        "As a small tailor shop owner, I was skeptical about technology. But this WhatsApp AI is so simple to use in Hindi. My customers love the instant responses!"
+                    </div>
+                    <div class="testimonial-author">
+                        <div class="author-info">
+                            <h4>Sunita Patel</h4>
+                            <p>Tailor, Mumbai</p>
+                            <div class="rating">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="testimonial-card">
+                    <div class="testimonial-content">
+                        "The lead generation feature has brought me 30% more customers. Now I don't miss any WhatsApp inquiries even when I'm busy with customers in my shop."
+                    </div>
+                    <div class="testimonial-author">
+                        <div class="author-info">
+                            <h4>Amit Khanna</h4>
+                            <p>Electronics Store, Bangalore</p>
+                            <div class="rating">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Pricing Section -->
+    <section class="pricing" id="pricing">
+        <div class="container">
+            <div class="section-title">
+                <h2>Simple, Affordable Pricing</h2>
+                <p>Choose the perfect plan for your business needs</p>
+            </div>
+            
+            <div class="pricing-grid">
+                <div class="pricing-card free">
+                    <div class="free-badge">Free</div>
+                    <h3>Starter</h3>
+                    <div class="price free">₹0<span>/month</span></div>
+                    <ul class="pricing-features">
+                        <li><i class="fas fa-check free-icon"></i> 100 automated messages</li>
+                        <li><i class="fas fa-check free-icon"></i> Basic auto-reply</li>
+                        <li><i class="fas fa-check free-icon"></i> 1 WhatsApp number</li>
+                        <li><i class="fas fa-check free-icon"></i> English support</li>
+                        <li><i class="fas fa-check free-icon"></i> 7-day trial</li>
+                    </ul>
+                    <a href="business-info.html" class="btn btn-secondary">Try for Free</a>
+                </div>
+                
+                <div class="pricing-card">
+                    <h3>Basic</h3>
+                    <div class="price">₹499<span>/month</span></div>
+                    <ul class="pricing-features">
+                        <li><i class="fas fa-check"></i> 500 automated messages</li>
+                        <li><i class="fas fa-check"></i> Smart auto-reply</li>
+                        <li><i class="fas fa-check"></i> 1 WhatsApp number</li>
+                        <li><i class="fas fa-check"></i> English & Hindi support</li>
+                        <li><i class="fas fa-check"></i> Basic analytics</li>
+                    </ul>
+                    <a href="business-info.html" class="btn btn-secondary">Get Started</a>
+                </div>
+                
+                <div class="pricing-card popular">
+                    <div class="popular-badge">Most Popular</div>
+                    <h3>Business</h3>
+                    <div class="price">₹999<span>/month</span></div>
+                    <ul class="pricing-features">
+                        <li><i class="fas fa-check"></i> 2000 automated messages</li>
+                        <li><i class="fas fa-check"></i> Smart AI responses</li>
+                        <li><i class="fas fa-check"></i> 2 WhatsApp numbers</li>
+                        <li><i class="fas fa-check"></i> 5 regional languages</li>
+                        <li><i class="fas fa-check"></i> Lead generation</li>
+                        <li><i class="fas fa-check"></i> Advanced analytics</li>
+                    </ul>
+                    <a href="business-info.html" class="btn btn-primary">Get Started</a>
+                </div>
+                
+                <div class="pricing-card">
+                    <h3>Enterprise</h3>
+                    <div class="price">₹1999<span>/month</span></div>
+                    <ul class="pricing-features">
+                        <li><i class="fas fa-check"></i> Unlimited messages</li>
+                        <li><i class="fas fa-check"></i> Advanced AI chatbot</li>
+                        <li><i class="fas fa-check"></i> 5 WhatsApp numbers</li>
+                        <li><i class="fas fa-check"></i> All Indian languages</li>
+                        <li><i class="fas fa-check"></i> Order management</li>
+                        <li><i class="fas fa-check"></i> CRM integration</li>
+                        <li><i class="fas fa-check"></i> Priority support</li>
+                    </ul>
+                    <a href="business-info.html" class="btn btn-secondary">Get Started</a>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- CTA Section -->
+    <section class="cta">
+        <div class="container">
+            <h2>Ready to Transform Your Business?</h2>
+            <p>Join thousands of Indian businesses using our WhatsApp AI automation to save time and grow their customer base</p>
+            <div class="cta-buttons">
+                <a href="business-info.html" class="btn btn-accent">Start 14-Day Free Trial</a>
+                <a href="https://calendly.com/your-company/demo" class="btn btn-secondary" target="_blank">Book a Demo</a>
+            </div>
+        </div>
+    </section>
+    
+    <!-- FAQ Section -->
+    <section class="faq" id="faq">
+        <div class="container">
+            <div class="section-title">
+                <h2>Frequently Asked Questions</h2>
+                <p>Find answers to common questions about our WhatsApp AI automation</p>
+            </div>
+            
+            <div class="faq-container">
+                <div class="faq-item">
+                    <div class="faq-question">
+                        Is this compatible with WhatsApp Business?
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Yes, our solution works seamlessly with both WhatsApp Business and regular WhatsApp accounts. We provide special features optimized for WhatsApp Business users.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        What Indian languages are supported?
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>We currently support Hindi, English, Bengali, Tamil, Telugu, Marathi, Gujarati, and Kannada. More Indian languages are being added based on customer demand.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        How long does setup take?
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Most businesses can get started in under 15 minutes. The basic setup takes just 5 minutes, and you can gradually train the AI with more information about your products/services.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        Is technical knowledge required?
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>No technical knowledge is needed. Our platform is designed specifically for small business owners in India with simple, intuitive controls available in multiple languages.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        Can I try before I buy?
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Absolutely! We offer a free plan with limited features and a 14-day free trial of our premium plans with full access to all features. No credit card required.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Footer -->
+    <div class="footer-top">
+        <div class="container">
+            <div class="footer-container">
+                <div class="footer-column">
+                    <div class="footer-logo">
+                        <div class="footer-logo-icon">
+                            <i class="fab fa-whatsapp"></i>
+                        </div>
+                        <div class="footer-logo-text">WhatsApp<span>AI</span></div>
+                    </div>
+                    <div class="footer-about">
+                        <p>Empowering Indian small businesses with affordable WhatsApp automation solutions since 2020.</p>
+                    </div>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Quick Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="#features">Features</a></li>
+                        <li><a href="#how-it-works">How It Works</a></li>
+                        <li><a href="#pricing">Pricing</a></li>
+                        <li><a href="#testimonials">Testimonials</a></li>
+                        <li><a href="#faq">FAQ</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Resources</h3>
+                    <ul class="footer-links">
+                        <li><a href="blog.html">Blog</a></li>
+                        <li><a href="help-center.html">Help Center</a></li>
+                        <li><a href="tutorials.html">Video Tutorials</a></li>
+                        <li><a href="api-docs.html">API Documentation</a></li>
+                        <li><a href="community.html">Community</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Contact Us</h3>
+                    <div class="footer-contact">
+                        <p><i class="fas fa-map-marker-alt"></i> 123 Business Street, Bangalore, India - 560001</p>
+                        <p><i class="fas fa-phone-alt"></i> +91 9876543210</p>
+                        <p><i class="fas fa-envelope"></i> support@whatsappai.com</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer-bottom">
+        <div class="container">
+            <p>&copy; 2023 WhatsAppAI. All rights reserved.</p>
+            <p>Proudly Made in India 🇮🇳</p>
+            <img src="https://upload.wikimedia.org/wikipedia/en/thumb/4/41/Flag_of_India.svg/1200px-Flag_of_India.svg.png" alt="Indian Flag" class="india-flag" width="80">
+        </div>
+    </div>
+    
+    <script>
+        // Language Selector Functionality
+        const languageBtn = document.querySelector('.language-btn');
+        const languageDropdown = document.querySelector('.language-dropdown');
+        
+        languageBtn.addEventListener('click', () => {
+            languageBtn.classList.toggle('active');
+            languageDropdown.classList.toggle('show');
+        });
+        
+        // Close language dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.language-selector')) {
+                languageBtn.classList.remove('active');
+                languageDropdown.classList.remove('show');
+            }
+        });
+        
+        // Language selection handler (would be connected to your translation system)
+        document.querySelectorAll('.language-option').forEach(option => {
+            option.addEventListener('click', () => {
+                const lang = option.getAttribute('data-lang');
+                // In a real implementation, this would load translations
+                console.log(`Language changed to: ${lang}`);
+                languageBtn.innerHTML = `${option.textContent} <i class="fas fa-chevron-down"></i>`;
+                languageDropdown.classList.remove('show');
+                languageBtn.classList.remove('active');
+                
+                // Show a toast notification about language change
+                showLanguageToast(option.textContent);
+            });
+        });
+        
+        function showLanguageToast(language) {
+            const toast = document.createElement('div');
+            toast.style.position = 'fixed';
+            toast.style.bottom = '20px';
+            toast.style.left = '50%';
+            toast.style.transform = 'translateX(-50%)';
+            toast.style.backgroundColor = 'var(--primary)';
+            toast.style.color = 'white';
+            toast.style.padding = '12px 24px';
+            toast.style.borderRadius = '4px';
+            toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+            toast.style.zIndex = '1000';
+            toast.style.transition = 'all 0.3s ease';
+            toast.style.opacity = '0';
+            toast.textContent = `Language set to ${language} (demo)`;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = '1';
+            }, 100);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => {
+                    document.body.removeChild(toast);
+                }, 300);
+            }, 3000);
+        }
+        
+        // FAQ functionality
+        document.querySelectorAll('.faq-question').forEach(question => {
+            question.addEventListener('click', () => {
+                const answer = question.nextElementSibling;
+                const isActive = question.classList.contains('active');
+                
+                // Close all other FAQs
+                document.querySelectorAll('.faq-question').forEach(q => {
+                    if (q !== question) {
+                        q.classList.remove('active');
+                        q.nextElementSibling.classList.remove('show');
+                    }
+                });
+                
+                // Toggle current FAQ
+                question.classList.toggle('active');
+                answer.classList.toggle('show');
+            });
+        });
+        
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+                
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+        
+        // Animation on scroll
+        function animateOnScroll() {
+            const elements = document.querySelectorAll('.feature-card, .step, .testimonial-card, .pricing-card, .feature-row');
+            
+            elements.forEach(element => {
+                const elementPosition = element.getBoundingClientRect().top;
+                const screenPosition = window.innerHeight / 1.2;
+                
+                if (elementPosition < screenPosition) {
+                    element.style.opacity = '1';
+                    element.style.transform = 'translateY(0)';
+                }
+            });
+        }
+        
+        // Set initial state for animation
+        document.querySelectorAll('.feature-card, .step, .testimonial-card, .pricing-card, .feature-row').forEach(element => {
+            element.style.opacity = '0';
+            element.style.transform = 'translateY(30px)';
+            element.style.transition = 'all 0.5s ease';
+        });
+        
+        // Run animation on load and scroll
+        window.addEventListener('load', animateOnScroll);
+        window.addEventListener('scroll', animateOnScroll);
+    </script>
+</body>
+</html>
